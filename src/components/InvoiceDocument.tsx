@@ -368,6 +368,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
             {invoice.notes && (
               <div className={hasPaymentInfo ? "mt-8" : ""}>
+                <div className="mb-5 h-px w-16 bg-[#d8cab2]" />
                 <div className={headingLabelClass}>
                   Notes
                 </div>
