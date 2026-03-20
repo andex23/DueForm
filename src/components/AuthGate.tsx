@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import {
   ArrowRight,
-  Cloud,
   FileText,
   Loader2,
   LogIn,
@@ -408,13 +407,16 @@ export default function AuthGate({
           </div>
 
           <div className="grid w-full gap-6 rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:gap-8 sm:p-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)] lg:p-10">
-            <section className="order-2 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:order-1 lg:px-6">
+            <section className="order-1 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:px-6">
               <div>
-                <div className="inline-flex items-center gap-3 rounded-lg border border-border bg-bg-elevated px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-dim text-accent">
-                    <Cloud size={15} />
+                <div className="inline-flex flex-col items-start">
+                  <span className="font-[family-name:var(--font-display)] text-[28px] font-semibold tracking-[-0.04em] text-text sm:text-[32px]">
+                    DueForm
                   </span>
-                  DueForm
+                  <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.24em] text-text-dim">
+                    Invoice Workspace
+                  </span>
+                  <span className="mt-4 h-px w-16 bg-accent/55" />
                 </div>
 
                 <ScrollReveal delay={40} className="mt-7 max-w-[560px] sm:mt-10">
@@ -519,7 +521,7 @@ export default function AuthGate({
               </ScrollReveal>
             </section>
 
-            <section className="order-1 flex items-start justify-center lg:order-2 lg:items-center">
+            <section className="order-2 flex items-start justify-center lg:items-center">
               <ScrollReveal delay={40} className="w-full max-w-[560px]">
                 <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10">
                 <div className="flex items-start justify-between gap-4">
