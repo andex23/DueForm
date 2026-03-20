@@ -116,6 +116,14 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
     invoice.client.phone,
     invoice.client.address,
   ].filter(Boolean);
+  const headingLabelClass =
+    "font-[family-name:var(--font-body)] text-[0.8rem] font-semibold uppercase tracking-[0.28em] text-[#9c7c42]";
+  const metaTextClass =
+    "font-[family-name:var(--font-body)] text-[0.95rem] font-medium leading-7 text-[#504840]";
+  const bodyCourierClass =
+    "font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 tracking-[0.01em] text-[#413a31]";
+  const amountTextClass =
+    "font-[family-name:var(--font-mono)] text-[1rem] font-semibold leading-7 text-[#3f382f]";
 
   return (
     <div
@@ -142,13 +150,13 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
               </div>
             )}
 
-            <h1 className="font-['Courier_New',monospace] text-[1.9rem] font-bold leading-none tracking-[-0.04em] text-[#15110d] sm:text-[2.2rem] md:text-[2.55rem]">
+            <h1 className="font-[family-name:var(--font-display)] text-[1.95rem] font-semibold leading-none tracking-[-0.04em] text-[#15110d] sm:text-[2.25rem] md:text-[2.7rem]">
               {invoice.business.name}
             </h1>
 
             <div className="mt-5 h-px w-28 bg-[#b4955d]" />
 
-            <div className="mt-5 space-y-2 font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 tracking-[0.01em] text-[#413a31] sm:text-[1rem]">
+            <div className={`mt-5 space-y-2 sm:text-[1rem] ${bodyCourierClass}`}>
               {senderLines.map((line) => (
                 <div key={line}>{line}</div>
               ))}
@@ -156,14 +164,14 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
           </div>
 
           <div className="md:min-w-[280px] md:text-right">
-            <div className="font-['Courier_New',monospace] text-[0.8rem] font-semibold uppercase tracking-[0.3em] text-[#9c7c42]">
+            <div className={headingLabelClass}>
               Invoice
             </div>
-            <div className="mt-2 font-['Courier_New',monospace] text-[1.95rem] font-bold tracking-[0.05em] text-[#9c7c42] sm:text-[2.3rem]">
+            <div className="mt-2 font-[family-name:var(--font-display)] text-[2rem] font-semibold tracking-[0.05em] text-[#9c7c42] sm:text-[2.4rem]">
               {invoice.invoiceNumber}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 text-[#504840] md:justify-end">
+            <div className={`mt-8 flex flex-wrap gap-x-8 gap-y-3 md:justify-end ${metaTextClass}`}>
               <div>{formatShortDate(invoice.dateIssued)}</div>
               <div>Due {formatShortDate(invoice.dateDue)}</div>
             </div>
@@ -173,14 +181,14 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
         <div className="mt-10 h-px bg-[#ece3d6]" />
 
         <section className="mt-8">
-          <div className="font-['Courier_New',monospace] text-[0.85rem] font-semibold uppercase tracking-[0.28em] text-[#9c7c42]">
+          <div className={headingLabelClass}>
             Bill To
           </div>
           <div className="mt-4 max-w-[460px]">
-            <div className="font-['Courier_New',monospace] text-[1.45rem] font-bold leading-tight tracking-[-0.03em] text-[#17130f] sm:text-[1.6rem]">
+            <div className="font-[family-name:var(--font-display)] text-[1.45rem] font-semibold leading-tight tracking-[-0.03em] text-[#17130f] sm:text-[1.65rem]">
               {invoice.client.name}
             </div>
-            <div className="mt-3 space-y-2 font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 text-[#413a31] sm:text-[1rem]">
+            <div className={`mt-3 space-y-2 sm:text-[1rem] ${bodyCourierClass}`}>
               {clientLines.map((line) => (
                 <div key={line}>{line}</div>
               ))}
@@ -190,16 +198,16 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
         <section className="mt-10">
           <div className="hidden border-y border-[#e8dfd2] py-4 md:grid md:grid-cols-[minmax(0,1fr)_86px_140px_160px] md:gap-6">
-            <div className="font-['Courier_New',monospace] text-[0.82rem] font-semibold uppercase tracking-[0.25em] text-[#9c7c42]">
+            <div className={headingLabelClass}>
               Description
             </div>
-            <div className="text-center font-['Courier_New',monospace] text-[0.82rem] font-semibold uppercase tracking-[0.25em] text-[#9c7c42]">
+            <div className={`text-center ${headingLabelClass}`}>
               Qty
             </div>
-            <div className="text-right font-['Courier_New',monospace] text-[0.82rem] font-semibold uppercase tracking-[0.25em] text-[#9c7c42]">
+            <div className={`text-right ${headingLabelClass}`}>
               Rate
             </div>
-            <div className="text-right font-['Courier_New',monospace] text-[0.82rem] font-semibold uppercase tracking-[0.25em] text-[#9c7c42]">
+            <div className={`text-right ${headingLabelClass}`}>
               Amount
             </div>
           </div>
@@ -213,13 +221,13 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 <div className="font-['Courier_New',monospace] text-[1rem] font-semibold leading-7 text-[#241e18]">
                   {item.description}
                 </div>
-                <div className="text-center font-['Courier_New',monospace] text-[1rem] font-semibold leading-7 text-[#4f473d]">
+                <div className={`text-center ${amountTextClass}`}>
                   {item.quantity}
                 </div>
-                <div className="text-right font-['Courier_New',monospace] text-[1rem] font-semibold leading-7 text-[#4f473d]">
+                <div className={`text-right ${amountTextClass}`}>
                   {formatCurrency(item.rate, currency)}
                 </div>
-                <div className="text-right font-['Courier_New',monospace] text-[1.05rem] font-bold leading-7 text-[#1a1510]">
+                <div className="text-right font-[family-name:var(--font-mono)] text-[1.02rem] font-semibold leading-7 text-[#1a1510]">
                   {formatCurrency(item.quantity * item.rate, currency)}
                 </div>
               </div>
@@ -237,26 +245,26 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   <div>
-                    <div className="font-['Courier_New',monospace] text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-[#9c7c42]">
+                    <div className={headingLabelClass}>
                       Qty
                     </div>
-                    <div className="mt-1 font-['Courier_New',monospace] text-[0.95rem] font-semibold text-[#4f473d]">
+                    <div className={`mt-1 ${amountTextClass}`}>
                       {item.quantity}
                     </div>
                   </div>
                   <div>
-                    <div className="font-['Courier_New',monospace] text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-[#9c7c42]">
+                    <div className={headingLabelClass}>
                       Rate
                     </div>
-                    <div className="mt-1 font-['Courier_New',monospace] text-[0.95rem] font-semibold text-[#4f473d]">
+                    <div className={`mt-1 ${amountTextClass}`}>
                       {formatCurrency(item.rate, currency)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-right font-['Courier_New',monospace] text-[0.75rem] font-semibold uppercase tracking-[0.2em] text-[#9c7c42]">
+                    <div className={`text-right ${headingLabelClass}`}>
                       Amount
                     </div>
-                    <div className="mt-1 text-right font-['Courier_New',monospace] text-[0.95rem] font-bold text-[#1a1510]">
+                    <div className="mt-1 text-right font-[family-name:var(--font-mono)] text-[0.98rem] font-semibold text-[#1a1510]">
                       {formatCurrency(item.quantity * item.rate, currency)}
                     </div>
                   </div>
@@ -270,22 +278,24 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
           <div className="min-w-0">
             {hasPaymentInfo && (
               <div>
-                <div className="font-['Courier_New',monospace] text-[0.85rem] font-semibold uppercase tracking-[0.28em] text-[#9c7c42]">
+                <div className={headingLabelClass}>
                   Payment Details
                 </div>
 
                 {methodSummary && (
-                  <div className="mt-4 font-['Courier_New',monospace] text-[1.15rem] font-bold leading-8 text-[#1a1510]">
+                  <div className="mt-4 font-[family-name:var(--font-body)] text-[1.08rem] font-semibold leading-8 text-[#1a1510]">
                     {methodSummary}
                   </div>
                 )}
 
                 {invoice.paymentTerms && (
-                  <div className="mt-4 font-['Courier_New',monospace] text-[0.98rem] font-semibold leading-7 text-[#413a31]">
+                  <div className="mt-4 font-[family-name:var(--font-body)] text-[0.96rem] font-medium leading-7 text-[#413a31]">
                     <span className="font-semibold text-[#2e271f]">
                       Payment Terms:
                     </span>{" "}
-                    {invoice.paymentTerms}
+                    <span className="font-['Courier_New',monospace] font-semibold">
+                      {invoice.paymentTerms}
+                    </span>
                   </div>
                 )}
 
@@ -298,10 +308,10 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
                     return (
                       <div key={method.id}>
-                        <div className="font-['Courier_New',monospace] text-[0.76rem] font-semibold uppercase tracking-[0.22em] text-[#857661]">
+                        <div className="font-[family-name:var(--font-body)] text-[0.76rem] font-semibold uppercase tracking-[0.22em] text-[#857661]">
                           {getMethodName(method)}
                         </div>
-                        <div className="mt-2 space-y-1.5 font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 text-[#413a31]">
+                        <div className={`mt-2 space-y-1.5 ${bodyCourierClass}`}>
                           {lines.map((line) => (
                             <div key={line} className="break-words">
                               {line}
@@ -314,14 +324,16 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 </div>
 
                 {paymentInfo.paymentLink && (
-                  <div className="mt-5 break-words font-['Courier_New',monospace] text-[0.98rem] font-semibold leading-7 text-[#413a31]">
+                  <div className="mt-5 break-words font-[family-name:var(--font-body)] text-[0.96rem] font-medium leading-7 text-[#413a31]">
                     <span className="font-semibold text-[#2e271f]">Pay Online:</span>{" "}
-                    <span className="text-[#9c7c42]">{paymentInfo.paymentLink}</span>
+                    <span className="font-['Courier_New',monospace] font-semibold text-[#9c7c42]">
+                      {paymentInfo.paymentLink}
+                    </span>
                   </div>
                 )}
 
                 {paymentInfo.paymentNote && (
-                  <div className="mt-3 font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 text-[#5d554a]">
+                  <div className={`mt-3 text-[#5d554a] ${bodyCourierClass}`}>
                     {paymentInfo.paymentNote}
                   </div>
                 )}
@@ -330,10 +342,10 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
             {invoice.notes && (
               <div className={hasPaymentInfo ? "mt-8" : ""}>
-                <div className="font-['Courier_New',monospace] text-[0.85rem] font-semibold uppercase tracking-[0.28em] text-[#9c7c42]">
+                <div className={headingLabelClass}>
                   Notes
                 </div>
-                <div className="mt-4 whitespace-pre-wrap font-['Courier_New',monospace] text-[0.98rem] font-semibold leading-7 text-[#413a31]">
+                <div className={`mt-4 whitespace-pre-wrap ${bodyCourierClass}`}>
                   {invoice.notes}
                 </div>
               </div>
@@ -341,24 +353,25 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
           </div>
 
           <div className="w-full lg:justify-self-end">
+            <div className="mb-5 h-px w-16 bg-[#cdbca2]" />
             <div className="space-y-4">
-              <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+              <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                 <span>Subtotal</span>
-                <span className="font-semibold text-[#2a231c]">
+                <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                   {formatCurrency(subtotal, currency)}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+              <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                 <span>Tax ({invoice.taxRate || 0}%)</span>
-                <span className="font-semibold text-[#2a231c]">
+                <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                   {formatCurrency(tax, currency)}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+              <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                 <span>Total</span>
-                <span className="font-semibold text-[#2a231c]">
+                <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                   {formatCurrency(total, currency)}
                 </span>
               </div>
@@ -368,19 +381,19 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 .map((adjustment) => (
                   <div
                     key={adjustment.id}
-                    className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]"
+                    className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]"
                   >
                     <span>{adjustment.label.trim() || "Credit / Offset"}</span>
-                    <span className="font-semibold text-[#2a231c]">
+                    <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                       -{formatCurrency(adjustment.amount || 0, currency)}
                     </span>
                   </div>
                 ))}
 
               {adjustmentTotal > 0 && (
-                <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+                <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                   <span>Adjusted Due</span>
-                  <span className="font-semibold text-[#2a231c]">
+                  <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                     {formatCurrency(adjustedTotal, currency)}
                   </span>
                 </div>
@@ -388,15 +401,15 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
               {amountPaid > 0 && (
                 <>
-                  <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+                  <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                     <span>Paid</span>
-                    <span className="font-semibold text-[#2a231c]">
+                    <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                       {formatCurrency(amountPaid, currency)}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+                  <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">
                     <span>Balance</span>
-                    <span className="font-semibold text-[#2a231c]">
+                    <span className="font-[family-name:var(--font-mono)] font-semibold text-[#2a231c]">
                       {formatCurrency(balance, currency)}
                     </span>
                   </div>
@@ -407,10 +420,10 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
             <div className="mt-5 h-px bg-[#cdbca2]" />
 
             <div className="mt-5 flex items-end justify-between gap-4">
-              <div className="font-['Courier_New',monospace] text-[1.2rem] font-bold uppercase tracking-[0.08em] text-[#3b342b]">
+              <div className="font-[family-name:var(--font-body)] text-[1.05rem] font-semibold uppercase tracking-[0.16em] text-[#3b342b]">
                 {amountLabel}
               </div>
-              <div className="text-right font-['Courier_New',monospace] text-[2.25rem] font-bold tracking-[-0.04em] text-[#9c7c42] sm:text-[2.6rem]">
+              <div className="text-right font-[family-name:var(--font-display)] text-[2.25rem] font-semibold tracking-[-0.04em] text-[#9c7c42] sm:text-[2.6rem]">
                 {formatCurrency(
                   amountPaid > 0 || adjustmentTotal > 0 ? balance : total,
                   currency
