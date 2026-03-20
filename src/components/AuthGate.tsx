@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import {
   ArrowRight,
+  ChevronDown,
   FileText,
   Loader2,
   LogIn,
+  ReceiptText,
   Sparkles,
   UserRoundPlus,
   WalletCards,
@@ -111,6 +113,7 @@ export default function AuthGate({
   const [businessName, setBusinessName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mobileAuthOpen, setMobileAuthOpen] = useState(false);
   const [authLoading, setAuthLoading] = useState<"signin" | "signup" | null>(
     null
   );
@@ -409,21 +412,22 @@ export default function AuthGate({
           <div className="grid w-full gap-6 rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:gap-8 sm:p-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)] lg:p-10">
             <section className="order-1 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:px-6">
               <div>
-                <div className="inline-flex flex-col items-start">
-                  <span className="font-[family-name:var(--font-display)] text-[28px] font-semibold tracking-[-0.04em] text-text sm:text-[32px]">
-                    DueForm
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="flex h-10 w-10 items-center justify-center text-accent sm:h-11 sm:w-11">
+                    <ReceiptText size={28} strokeWidth={1.8} />
                   </span>
-                  <span className="mt-1 text-[11px] font-medium uppercase tracking-[0.24em] text-text-dim">
-                    Invoice Workspace
-                  </span>
-                  <span className="mt-4 h-px w-16 bg-accent/55" />
+                  <div>
+                    <span className="block font-[family-name:var(--font-display)] text-[32px] font-semibold uppercase tracking-[0.04em] text-text sm:text-[38px]">
+                      DueForm
+                    </span>
+                    <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.24em] text-text-dim">
+                      Invoice Workspace
+                    </span>
+                  </div>
                 </div>
 
                 <ScrollReveal delay={40} className="mt-7 max-w-[560px] sm:mt-10">
-                  <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.26em] text-accent">
-                    Multi-user invoicing
-                  </p>
-                  <h1 className="m-0 mt-4 max-w-[12ch] font-[family-name:var(--font-display)] text-[36px] font-semibold leading-[0.96] tracking-[-0.035em] text-text sm:mt-5 sm:max-w-[11ch] sm:text-[58px]">
+                  <h1 className="m-0 max-w-[12ch] font-[family-name:var(--font-display)] text-[36px] font-semibold leading-[0.96] tracking-[-0.035em] text-text sm:max-w-[11ch] sm:text-[58px]">
                     Create invoices, send PDFs, track payments.
                   </h1>
                   <p className="m-0 mt-4 max-w-[490px] text-[15px] leading-6 text-text-muted sm:mt-5 sm:text-[16px] sm:leading-7">
@@ -431,6 +435,10 @@ export default function AuthGate({
                     teams who want polished billing without the usual clutter.
                   </p>
                 </ScrollReveal>
+
+                <div className="mt-5 sm:hidden max-w-[360px]">
+                  <ThemeSwitcher compact />
+                </div>
 
                 <div className="mt-7 max-w-[560px] space-y-3 sm:mt-10 sm:space-y-4">
                   {featureRows.map((item, index) => {
@@ -523,7 +531,34 @@ export default function AuthGate({
 
             <section className="order-2 flex items-start justify-center lg:items-center">
               <ScrollReveal delay={40} className="w-full max-w-[560px]">
-                <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10">
+                <div className="lg:hidden">
+                  <button
+                    type="button"
+                    onClick={() => setMobileAuthOpen((open) => !open)}
+                    className="flex w-full items-center justify-between rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] px-5 py-4 text-left shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
+                  >
+                    <div>
+                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
+                        {isSigningIn ? "Sign in" : "Create account"}
+                      </div>
+                      <div className="mt-2 text-[14px] font-medium text-text">
+                        {mobileAuthOpen
+                          ? "Hide account access"
+                          : isSigningIn
+                            ? "Open account access"
+                            : "Open workspace setup"}
+                      </div>
+                    </div>
+                    <ChevronDown
+                      size={18}
+                      className={`text-text-muted transition-transform ${mobileAuthOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                </div>
+
+                <div
+                  className={`${mobileAuthOpen ? "mt-4 block" : "hidden"} rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10 lg:mt-0 lg:block`}
+                >
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-accent">
@@ -541,10 +576,6 @@ export default function AuthGate({
                   <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-border bg-accent-dim text-accent">
                     {isSigningIn ? <LogIn size={20} /> : <UserRoundPlus size={20} />}
                   </div>
-                </div>
-
-                <div className="mt-5 sm:hidden">
-                  <ThemeSwitcher compact />
                 </div>
 
                 <div className="mt-8 rounded-[10px] border border-border bg-bg-elevated p-1.5">

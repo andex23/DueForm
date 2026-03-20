@@ -73,10 +73,10 @@ export default function ThemeSwitcher({
               className={`rounded-lg border px-3 py-3 text-left transition-all ${
                 isActive
                   ? "border-accent/45 bg-accent-dim text-accent"
-                  : "border-border bg-bg-elevated/70 text-text-muted hover:border-border-hover hover:text-text"
+                  : "border-border bg-bg-elevated/70 text-text hover:border-border-hover"
               }`}
             >
-              <div className="flex items-center gap-2.5">
+              <div className={`flex ${compact ? "flex-col items-start gap-2.5" : "items-center gap-2.5"}`}>
                 <div className="flex items-center gap-1">
                   <span
                     className="h-3 w-3 rounded-full border border-white/10"
@@ -91,10 +91,15 @@ export default function ThemeSwitcher({
                     style={{ background: theme.colors.accent }}
                   />
                 </div>
-                <div className="min-w-0">
-                  <div className="truncate text-[12px] font-semibold">
-                    {compact ? theme.shortName : theme.name}
+                <div className={`min-w-0 ${compact ? "space-y-0.5" : ""}`}>
+                  <div className={`${compact ? "text-[11px] leading-[1.15rem]" : "truncate text-[12px]"} font-semibold`}>
+                    {compact ? theme.shortName.toUpperCase() : theme.name}
                   </div>
+                  {compact && (
+                    <div className={`text-[10px] leading-[1rem] ${isActive ? "text-accent/80" : "text-text-dim"}`}>
+                      {theme.name}
+                    </div>
+                  )}
                 </div>
               </div>
             </button>
