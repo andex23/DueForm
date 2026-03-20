@@ -52,11 +52,8 @@ export default function ThemeSwitcher({
               <Palette size={13} />
             </div>
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim">
-                Theme
-              </div>
               <div className="text-[11px] font-medium text-text">
-                Choose palette
+                Choose a theme
               </div>
             </div>
           </div>
@@ -67,11 +64,8 @@ export default function ThemeSwitcher({
             <Palette size={15} />
           </div>
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-text-dim">
-              Theme
-            </div>
             <div className="text-[13px] font-medium text-text">
-              Choose your dark palette
+              Choose a theme
             </div>
           </div>
         </div>

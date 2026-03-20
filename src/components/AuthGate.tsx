@@ -41,18 +41,18 @@ const authInputClass =
 const featureRows = [
   {
     icon: FileText,
-    title: "Create polished invoices fast",
-    body: "Create clean invoices and export ready-to-send PDFs.",
+    title: "Polished invoices, ready to send",
+    body: "Create clean invoices and export professional PDFs in minutes.",
   },
   {
     icon: WalletCards,
-    title: "Track payment details clearly",
-    body: "Track payment methods, balances, and overdue states.",
+    title: "Clear payment tracking",
+    body: "Keep balances, payment methods, and overdue invoices in one place.",
   },
   {
     icon: Sparkles,
-    title: "Reuse repeat work",
-    body: "Keep clients, saved items, and previous invoices close.",
+    title: "Faster repeat billing",
+    body: "Reuse clients, saved items, and past invoices without starting over.",
   },
 ] as const;
 
@@ -396,11 +396,11 @@ export default function AuthGate({
   if (!session && !guestMode) {
     const isSigningIn = view === "signin";
     const authTitle = isSigningIn
-      ? "Sign in to your workspace"
-      : "Create your account";
+      ? "Sign in to DueForm"
+      : "Create your workspace";
     const authDescription = isSigningIn
-      ? "Access your invoices, clients, and payment history."
-      : "Start creating professional invoices in minutes.";
+      ? "Access your invoices, clients, and saved billing details."
+      : "Start invoicing in minutes with a cleaner setup from day one.";
 
     return (
       <div className="relative min-h-screen overflow-hidden bg-bg px-4 pb-6 pt-3 sm:px-8 sm:py-8 lg:px-10">
@@ -420,7 +420,7 @@ export default function AuthGate({
                   </span>
                   <div>
                     <span className="block font-[family-name:var(--font-display)] text-[28px] font-semibold uppercase leading-none tracking-[0.05em] text-text sm:text-[34px]">
-                      DueForm
+                      DUEFORM
                     </span>
                     <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.22em] text-text-dim">
                       Invoice Workspace
@@ -430,10 +430,10 @@ export default function AuthGate({
 
                 <ScrollReveal delay={40} className="mt-5 max-w-[520px] sm:mt-7">
                   <h1 className="m-0 max-w-[11ch] font-[family-name:var(--font-display)] text-[32px] font-semibold leading-[0.94] tracking-[-0.03em] text-text sm:text-[52px]">
-                    Create invoices, send PDFs, track payments.
+                    Invoice cleanly. Get paid clearly.
                   </h1>
                   <p className="m-0 mt-3 max-w-[410px] text-[14px] leading-6 text-text-muted sm:mt-4 sm:text-[15px]">
-                    Polished billing for freelancers, studios, and small teams.
+                    Create polished invoices, send ready-to-send PDFs, and keep every payment detail in one calm workspace.
                   </p>
                 </ScrollReveal>
               </section>
@@ -448,12 +448,12 @@ export default function AuthGate({
                     >
                       <div>
                         <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
-                          {isSigningIn ? "Sign in" : "Create account"}
+                          {isSigningIn ? "Sign in to DueForm" : "Create your workspace"}
                         </div>
                         <div className="mt-1.5 text-[14px] font-medium text-text">
                           {isSigningIn
-                            ? "Sign in to continue"
-                            : "Create your account"}
+                            ? "Open sign in"
+                            : "Open account setup"}
                         </div>
                       </div>
                       <ChevronDown
@@ -600,7 +600,7 @@ export default function AuthGate({
                               Continue as guest
                             </div>
                             <div className="mt-1 text-[11px] leading-5 text-text-muted">
-                              Local-only session. Not saved to the cloud.
+                              Create an invoice first. Sign in later.
                             </div>
                           </div>
                           <ArrowRight size={16} className="shrink-0 text-accent" />
