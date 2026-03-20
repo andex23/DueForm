@@ -593,14 +593,18 @@ export default function AuthGate({
 
                         <button
                           onClick={handleContinueAsGuest}
-                          className="mt-3 flex h-[46px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-transparent text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
+                          className="mt-3 flex w-full items-center justify-between gap-4 rounded-[10px] border border-accent/20 bg-accent/8 px-4 py-3 text-left transition-all hover:border-accent/35 hover:bg-accent/12"
                         >
-                          Continue as guest
-                          <ArrowRight size={14} />
+                          <div>
+                            <div className="text-[13px] font-semibold text-text">
+                              Continue as guest
+                            </div>
+                            <div className="mt-1 text-[11px] leading-5 text-text-muted">
+                              Local-only session. Not saved to the cloud.
+                            </div>
+                          </div>
+                          <ArrowRight size={16} className="shrink-0 text-accent" />
                         </button>
-                        <p className="m-0 mt-2 text-center text-[11px] leading-5 text-text-dim">
-                          Local-only session. Not saved to the cloud.
-                        </p>
 
                         <div className="mt-4 text-center text-[13px] text-text-muted">
                           {isSigningIn
