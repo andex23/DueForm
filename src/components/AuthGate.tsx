@@ -405,11 +405,8 @@ export default function AuthGate({
         </div>
 
         <div className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-[1350px] items-start lg:min-h-[calc(100vh-4rem)] lg:items-center">
-          <div className="absolute right-0 top-0 z-20 hidden sm:block">
-            <ThemeSwitcher compact className="w-[290px]" />
-          </div>
-
-          <div className="grid w-full gap-6 rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:gap-8 sm:p-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)] lg:p-10">
+          <div className="w-full rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:p-8 lg:p-10">
+          <div className="grid w-full gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)]">
             <section className="order-1 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:px-6">
               <div>
                 <div className="flex items-center gap-3 sm:gap-4">
@@ -435,10 +432,6 @@ export default function AuthGate({
                     teams who want polished billing without the usual clutter.
                   </p>
                 </ScrollReveal>
-
-                <div className="mt-5 sm:hidden max-w-[360px]">
-                  <ThemeSwitcher compact />
-                </div>
 
                 <div className="mt-7 max-w-[560px] space-y-3 sm:mt-10 sm:space-y-4">
                   {featureRows.map((item, index) => {
@@ -717,6 +710,11 @@ export default function AuthGate({
                 </div>
               </ScrollReveal>
             </section>
+          </div>
+
+          <div className="mt-6 flex justify-start lg:justify-end">
+            <ThemeSwitcher compact className="w-full max-w-[360px] sm:w-[320px]" />
+          </div>
           </div>
         </div>
       </div>
