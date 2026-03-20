@@ -4,6 +4,8 @@ import Image from "next/image";
 import { forwardRef } from "react";
 import { Invoice, PaymentMethod } from "@/lib/types";
 import {
+  calculateAdjustedTotal,
+  calculateAdjustmentTotal,
   calculateAmountPaid,
   calculateBalance,
   calculateSubtotal,
@@ -80,11 +82,18 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
   const subtotal = calculateSubtotal(invoice.lineItems);
   const tax = calculateTax(subtotal, invoice.taxRate);
   const total = calculateTotal(invoice.lineItems, invoice.taxRate);
+  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
+  const adjustedTotal = calculateAdjustedTotal(
+    invoice.lineItems,
+    invoice.taxRate,
+    invoice.adjustments || []
+  );
   const amountPaid = calculateAmountPaid(invoice.payments || []);
   const balance = calculateBalance(
     invoice.lineItems,
     invoice.taxRate,
-    invoice.payments || []
+    invoice.payments || [],
+    invoice.adjustments || []
   );
   const paymentInfo = invoice.paymentInfo;
   const paymentMethods = paymentInfo?.methods || [];
@@ -94,7 +103,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
     !!paymentInfo?.paymentNote ||
     !!invoice.paymentTerms;
   const methodSummary = getMethodSummary(paymentMethods);
-  const amountLabel = amountPaid > 0 ? "Balance Due" : "Total Due";
+  const amountLabel = amountPaid > 0 || adjustmentTotal > 0 ? "Balance Due" : "Total Due";
   const senderLines = [
     invoice.business.email,
     invoice.business.phone,
@@ -347,6 +356,36 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 </span>
               </div>
 
+              <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+                <span>Total</span>
+                <span className="font-semibold text-[#2a231c]">
+                  {formatCurrency(total, currency)}
+                </span>
+              </div>
+
+              {(invoice.adjustments || [])
+                .filter((adjustment) => adjustment.amount > 0 || adjustment.label.trim())
+                .map((adjustment) => (
+                  <div
+                    key={adjustment.id}
+                    className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]"
+                  >
+                    <span>{adjustment.label.trim() || "Credit / Offset"}</span>
+                    <span className="font-semibold text-[#2a231c]">
+                      -{formatCurrency(adjustment.amount || 0, currency)}
+                    </span>
+                  </div>
+                ))}
+
+              {adjustmentTotal > 0 && (
+                <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
+                  <span>Adjusted Due</span>
+                  <span className="font-semibold text-[#2a231c]">
+                    {formatCurrency(adjustedTotal, currency)}
+                  </span>
+                </div>
+              )}
+
               {amountPaid > 0 && (
                 <>
                   <div className="flex items-center justify-between gap-6 font-['Courier_New',monospace] text-[1rem] font-semibold text-[#4f473d]">
@@ -372,7 +411,10 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 {amountLabel}
               </div>
               <div className="text-right font-['Courier_New',monospace] text-[2.25rem] font-bold tracking-[-0.04em] text-[#9c7c42] sm:text-[2.6rem]">
-                {formatCurrency(amountPaid > 0 ? balance : total, currency)}
+                {formatCurrency(
+                  amountPaid > 0 || adjustmentTotal > 0 ? balance : total,
+                  currency
+                )}
               </div>
             </div>
           </div>

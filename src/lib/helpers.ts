@@ -4,6 +4,7 @@ import {
   CURRENCIES,
   PartialPayment,
   Invoice,
+  InvoiceAdjustment,
   ReminderRule,
 } from "./types";
 
@@ -41,12 +42,38 @@ export function calculateTotal(items: LineItem[], taxRate: number): number {
   return subtotal + calculateTax(subtotal, taxRate);
 }
 
+export function calculateAdjustmentTotal(
+  adjustments: InvoiceAdjustment[] = []
+): number {
+  return (adjustments || []).reduce((sum, adjustment) => {
+    const amount = Number.isFinite(adjustment.amount) ? adjustment.amount : 0;
+    return sum + Math.max(0, amount);
+  }, 0);
+}
+
+export function calculateAdjustedTotal(
+  items: LineItem[],
+  taxRate: number,
+  adjustments: InvoiceAdjustment[] = []
+): number {
+  return Math.max(0, calculateTotal(items, taxRate) - calculateAdjustmentTotal(adjustments));
+}
+
 export function calculateAmountPaid(payments: PartialPayment[]): number {
   return (payments || []).reduce((sum, p) => sum + p.amount, 0);
 }
 
-export function calculateBalance(items: LineItem[], taxRate: number, payments: PartialPayment[]): number {
-  return calculateTotal(items, taxRate) - calculateAmountPaid(payments);
+export function calculateBalance(
+  items: LineItem[],
+  taxRate: number,
+  payments: PartialPayment[],
+  adjustments: InvoiceAdjustment[] = []
+): number {
+  return Math.max(
+    0,
+    calculateAdjustedTotal(items, taxRate, adjustments) -
+      calculateAmountPaid(payments)
+  );
 }
 
 export function getDefaultReminderRules(): ReminderRule[] {

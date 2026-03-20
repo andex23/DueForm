@@ -74,7 +74,13 @@ function DashboardContent() {
     )
     .reduce(
       (sum, i) =>
-        sum + calculateBalance(i.lineItems, i.taxRate, i.payments || []),
+        sum +
+          calculateBalance(
+            i.lineItems,
+            i.taxRate,
+            i.payments || [],
+            i.adjustments || []
+          ),
       0
     );
 
@@ -279,7 +285,8 @@ function DashboardContent() {
                 const balance = calculateBalance(
                   invoice.lineItems,
                   invoice.taxRate,
-                  invoice.payments || []
+                  invoice.payments || [],
+                  invoice.adjustments || []
                 );
                 const reminderCount = getDueReminderRules(invoice).length;
 

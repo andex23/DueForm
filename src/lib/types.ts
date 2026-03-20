@@ -62,6 +62,12 @@ export interface PaymentInfo {
   paymentNote: string;
 }
 
+export interface InvoiceAdjustment {
+  id: string;
+  label: string;
+  amount: number;
+}
+
 export interface EmailSenderSettings {
   fromName: string;
   fromEmail: string;
@@ -226,6 +232,7 @@ export interface Invoice {
   business: BusinessProfile;
   client: ClientInfo;
   lineItems: LineItem[];
+  adjustments: InvoiceAdjustment[];
   taxRate: number;
   notes: string;
   paymentTerms: string;

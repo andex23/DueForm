@@ -25,6 +25,11 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "DueForm",
   description: "Create invoices, send PDFs, and track payments with DueForm.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 const themeBootScript = `

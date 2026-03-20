@@ -34,6 +34,8 @@ import {
 import {
   buildPublicInvoicePath,
   buildPublicInvoiceUrl,
+  calculateAdjustedTotal,
+  calculateAdjustmentTotal,
   calculateAmountPaid,
   calculateBalance,
   calculateReminderDate,
@@ -79,8 +81,13 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     `Invoice ${initialInvoice.invoiceNumber} from ${initialInvoice.business.name}`
   );
   const [emailMessage, setEmailMessage] = useState(
-    `Hi ${initialInvoice.client.name},\n\nPlease find invoice ${initialInvoice.invoiceNumber} for ${formatCurrency(
-      calculateTotal(initialInvoice.lineItems, initialInvoice.taxRate),
+    `Hi ${initialInvoice.client.name},\n\nPlease find invoice ${initialInvoice.invoiceNumber}. The current amount due is ${formatCurrency(
+      calculateBalance(
+        initialInvoice.lineItems,
+        initialInvoice.taxRate,
+        initialInvoice.payments || [],
+        initialInvoice.adjustments || []
+      ),
       initialInvoice.currency
     )}.\n\nDue date: ${formatDate(initialInvoice.dateDue)}.\n\nThank you for your business!\n\nBest regards,\n${initialInvoice.business.name}`
   );
@@ -97,11 +104,18 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const total = calculateTotal(invoice.lineItems, invoice.taxRate);
+  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
+  const adjustedTotal = calculateAdjustedTotal(
+    invoice.lineItems,
+    invoice.taxRate,
+    invoice.adjustments || []
+  );
   const amountPaid = calculateAmountPaid(invoice.payments || []);
   const balance = calculateBalance(
     invoice.lineItems,
     invoice.taxRate,
-    invoice.payments || []
+    invoice.payments || [],
+    invoice.adjustments || []
   );
   const dueReminderRules = getDueReminderRules(invoice);
   const nextReminderRule = getNextReminderRule(invoice);
@@ -487,15 +501,30 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div
+        className={`grid gap-4 mb-6 md:grid-cols-2 ${adjustmentTotal > 0 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}
+      >
         <div className="bg-bg-card border border-border rounded-xl p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
-            Total
+            Invoice Total
           </span>
           <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)]">
             {formatCurrency(total, invoice.currency)}
           </p>
         </div>
+        {adjustmentTotal > 0 && (
+          <div className="bg-bg-card border border-border rounded-xl p-5">
+            <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
+              Credits
+            </span>
+            <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-success">
+              -{formatCurrency(adjustmentTotal, invoice.currency)}
+            </p>
+            <span className="text-[11px] text-text-dim mt-1 block">
+              Adjusted due {formatCurrency(adjustedTotal, invoice.currency)}
+            </span>
+          </div>
+        )}
         <div className="bg-bg-card border border-border rounded-xl p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
             Paid
@@ -537,7 +566,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
                 Payment Tracker
               </h3>
               <p className="text-[12px] text-text-dim m-0 mt-1">
-                Record staged payments and keep the invoice balance accurate.
+                Record cash payments after any credits or barter offsets have been applied.
               </p>
             </div>
             <button

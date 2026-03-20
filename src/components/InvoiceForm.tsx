@@ -36,6 +36,7 @@ import {
   LineItem,
   BusinessProfile,
   ClientInfo,
+  InvoiceAdjustment,
   PaymentInfo,
   PaymentMethod,
   PaymentMethodType,
@@ -56,6 +57,8 @@ import {
   getSavedServices,
 } from "@/lib/store";
 import {
+  calculateAdjustedTotal,
+  calculateAdjustmentTotal,
   calculateSubtotal,
   calculateTax,
   calculateTotal,
@@ -71,6 +74,10 @@ interface Props {
 
 function emptyLineItem(): LineItem {
   return { id: uuidv4(), description: "", quantity: 1, rate: 0 };
+}
+
+function emptyAdjustment(): InvoiceAdjustment {
+  return { id: uuidv4(), label: "", amount: 0 };
 }
 
 function todayStr() { return new Date().toISOString().split("T")[0]; }
@@ -129,6 +136,7 @@ interface EditorDraftSnapshot {
   dateIssued: string;
   dateDue: string;
   lineItems: LineItem[];
+  adjustments: InvoiceAdjustment[];
   taxRate: number;
   notes: string;
   paymentTerms: string;
@@ -249,6 +257,9 @@ function InvoiceFormContent({ existingInvoice }: Props) {
   const [lineItems, setLineItems] = useState<LineItem[]>(
     () => initialDraft?.lineItems || existingInvoice?.lineItems || [emptyLineItem()]
   );
+  const [adjustments, setAdjustments] = useState<InvoiceAdjustment[]>(
+    () => initialDraft?.adjustments || existingInvoice?.adjustments || []
+  );
   const [taxRate, setTaxRate] = useState(
     () => initialDraft?.taxRate || existingInvoice?.taxRate || 0
   );
@@ -329,6 +340,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
         dateIssued,
         dateDue,
         lineItems,
+        adjustments,
         taxRate,
         notes,
         paymentTerms,
@@ -358,6 +370,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
     draftStorageKey,
     invoiceNumber,
     lineItems,
+    adjustments,
     notes,
     paymentInfo,
     paymentTerms,
@@ -460,6 +473,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
       business,
       client,
       lineItems,
+      adjustments,
       taxRate,
       notes,
       paymentTerms,
@@ -498,6 +512,22 @@ function InvoiceFormContent({ existingInvoice }: Props) {
   };
   const addLineItem = () => setLineItems((prev) => [...prev, emptyLineItem()]);
   const removeLineItem = (id: string) => { if (lineItems.length > 1) setLineItems((prev) => prev.filter((item) => item.id !== id)); };
+  const addAdjustment = () =>
+    setAdjustments((prev) => [...prev, emptyAdjustment()]);
+  const updateAdjustment = (
+    id: string,
+    field: keyof Pick<InvoiceAdjustment, "label" | "amount">,
+    value: string | number
+  ) => {
+    setAdjustments((prev) =>
+      prev.map((adjustment) =>
+        adjustment.id === id ? { ...adjustment, [field]: value } : adjustment
+      )
+    );
+  };
+  const removeAdjustment = (id: string) => {
+    setAdjustments((prev) => prev.filter((adjustment) => adjustment.id !== id));
+  };
   const handleLogoUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -549,6 +579,8 @@ function InvoiceFormContent({ existingInvoice }: Props) {
   const subtotal = calculateSubtotal(lineItems);
   const tax = calculateTax(subtotal, taxRate);
   const total = calculateTotal(lineItems, taxRate);
+  const adjustmentTotal = calculateAdjustmentTotal(adjustments);
+  const dueAfterAdjustments = calculateAdjustedTotal(lineItems, taxRate, adjustments);
 
   const persistInvoice = (mode: SaveMode) => {
     if (mode !== "draft" && !validateCompleteInvoice()) {
@@ -1182,6 +1214,82 @@ function InvoiceFormContent({ existingInvoice }: Props) {
           <section className={sectionCard}>
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
+                <div className={sectionTitle}>Credits / Offsets</div>
+                <p className="mt-2 text-[14px] leading-6 text-text-muted">
+                  Use this for artwork, barter, sponsorship, or any non-cash value that should reduce the amount due.
+                </p>
+              </div>
+              <button
+                onClick={addAdjustment}
+                className="flex items-center gap-2 rounded-lg border border-border bg-bg-input px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
+              >
+                <Plus size={14} />
+                Add Credit
+              </button>
+            </div>
+
+            {adjustments.length === 0 ? (
+              <div className="rounded-[10px] border border-dashed border-border bg-[#13110e] px-5 py-6 text-center">
+                <div className="text-[14px] font-semibold text-text">
+                  No credits or offsets yet
+                </div>
+                <p className="mt-2 text-[13px] leading-6 text-text-dim">
+                  Add a label like <span className="text-text">Artwork credit</span> and the value to keep the full invoice total while lowering the cash due.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {adjustments.map((adjustment, index) => (
+                  <div
+                    key={adjustment.id}
+                    className="grid gap-3 rounded-[10px] border border-[#27231c] bg-[#13110e] px-4 py-4 md:grid-cols-[minmax(0,1fr)_180px_44px]"
+                  >
+                    <div>
+                      <label className={lc}>Label</label>
+                      <input
+                        className={ic}
+                        value={adjustment.label}
+                        onChange={(e) =>
+                          updateAdjustment(adjustment.id, "label", e.target.value)
+                        }
+                        placeholder={index === 0 ? "Artwork credit" : "Credit label"}
+                      />
+                    </div>
+                    <div>
+                      <label className={lc}>Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className={ic}
+                        value={adjustment.amount || ""}
+                        onChange={(e) =>
+                          updateAdjustment(
+                            adjustment.id,
+                            "amount",
+                            Math.max(0, parseFloat(e.target.value) || 0)
+                          )
+                        }
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        onClick={() => removeAdjustment(adjustment.id)}
+                        className="flex h-11 w-11 items-center justify-center rounded-md border border-transparent text-text-dim transition-all hover:border-danger/20 hover:bg-danger/8 hover:text-danger"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className={sectionCard}>
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
                 <div className={sectionTitle}>Payment Methods</div>
                 <p className="mt-2 text-[14px] leading-6 text-text-muted">
                   Keep the common options visible first. Crypto stays available as an advanced method.
@@ -1505,12 +1613,39 @@ function InvoiceFormContent({ existingInvoice }: Props) {
                   {formatCurrency(tax, currency)}
                 </span>
               </div>
+              <div className="flex items-center justify-between text-[14px] text-text-muted">
+                <span>Invoice Total</span>
+                <span className="font-[family-name:var(--font-mono)] text-[#e9dfcb]">
+                  {formatCurrency(total, currency)}
+                </span>
+              </div>
+              {adjustments
+                .filter((adjustment) => adjustment.amount > 0 || adjustment.label.trim())
+                .map((adjustment) => (
+                  <div
+                    key={adjustment.id}
+                    className="flex items-center justify-between text-[14px] text-text-muted"
+                  >
+                    <span>{adjustment.label.trim() || "Credit / Offset"}</span>
+                    <span className="font-[family-name:var(--font-mono)] text-success">
+                      -{formatCurrency(adjustment.amount || 0, currency)}
+                    </span>
+                  </div>
+                ))}
+              {adjustmentTotal > 0 && (
+                <div className="flex items-center justify-between text-[14px] text-text-muted">
+                  <span>Total Credits</span>
+                  <span className="font-[family-name:var(--font-mono)] text-success">
+                    -{formatCurrency(adjustmentTotal, currency)}
+                  </span>
+                </div>
+              )}
               <div className="rounded-[10px] border border-accent/20 bg-accent/10 px-4 py-4">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d5bb84]">
-                  Total Due
+                  Cash Due
                 </div>
                 <div className="mt-2 text-right font-[family-name:var(--font-display)] text-[34px] font-semibold tracking-tight text-[#f0dfb7]">
-                  {formatCurrency(total, currency)}
+                  {formatCurrency(dueAfterAdjustments, currency)}
                 </div>
               </div>
             </div>

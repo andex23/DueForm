@@ -7,6 +7,7 @@ import { ArrowLeft, Globe2, Wallet } from "lucide-react";
 import InvoiceDocument from "@/components/InvoiceDocument";
 import { getInvoiceByToken } from "@/lib/store";
 import {
+  calculateAdjustmentTotal,
   calculateBalance,
   calculateTotal,
   formatCurrency,
@@ -82,10 +83,12 @@ export default function PublicInvoicePage() {
   }
 
   const total = calculateTotal(invoice.lineItems, invoice.taxRate);
+  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
   const balance = calculateBalance(
     invoice.lineItems,
     invoice.taxRate,
-    invoice.payments || []
+    invoice.payments || [],
+    invoice.adjustments || []
   );
 
   return (
@@ -118,15 +121,25 @@ export default function PublicInvoicePage() {
             <div className="flex flex-wrap items-stretch gap-3">
               <div className="min-w-[164px] rounded-[10px] border border-border bg-bg-card px-5 py-4">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim">
-                  Total
+                  Invoice Total
                 </span>
                 <div className="mt-2 font-[family-name:var(--font-mono)] text-[24px] font-semibold text-text">
                   {formatCurrency(total, invoice.currency)}
                 </div>
               </div>
+              {adjustmentTotal > 0 && (
+                <div className="min-w-[164px] rounded-[10px] border border-border bg-bg-card px-5 py-4">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim">
+                    Credits
+                  </span>
+                  <div className="mt-2 font-[family-name:var(--font-mono)] text-[24px] font-semibold text-success">
+                    -{formatCurrency(adjustmentTotal, invoice.currency)}
+                  </div>
+                </div>
+              )}
               <div className="min-w-[164px] rounded-[10px] border border-border bg-bg-card px-5 py-4">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim">
-                  Balance
+                  Balance Due
                 </span>
                 <div className="mt-2 font-[family-name:var(--font-mono)] text-[24px] font-semibold text-accent">
                   {formatCurrency(balance, invoice.currency)}

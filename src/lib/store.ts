@@ -10,9 +10,14 @@ import {
   InvoiceStatus,
   WorkspaceSnapshot,
   CRYPTO_CURRENCIES,
+  InvoiceAdjustment,
 } from "./types";
 import { v4 as uuidv4 } from "uuid";
-import { getDefaultReminderRules } from "./helpers";
+import {
+  calculateAdjustmentTotal,
+  calculateTotal,
+  getDefaultReminderRules,
+} from "./helpers";
 import { isGuestModeEnabled } from "./cloud";
 
 const STORAGE_KEY = "dru-invoices";
@@ -94,6 +99,26 @@ function migratePaymentMethod(method: PaymentMethod): PaymentMethod {
   };
 }
 
+function migrateAdjustments(raw: unknown): InvoiceAdjustment[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+
+  return raw.map((entry) => {
+    const item = typeof entry === "object" && entry ? entry : {};
+    const candidate = item as Partial<InvoiceAdjustment>;
+
+    return {
+      id: candidate.id || uuidv4(),
+      label: typeof candidate.label === "string" ? candidate.label : "",
+      amount:
+        typeof candidate.amount === "number" && Number.isFinite(candidate.amount)
+          ? Math.max(0, candidate.amount)
+          : 0,
+    };
+  });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function migratePaymentInfo(raw: any): PaymentInfo {
   if (!raw) return { methods: [], paymentLink: "", paymentNote: "" };
@@ -129,6 +154,7 @@ function migratePaymentInfo(raw: any): PaymentInfo {
 function migrateInvoice(raw: any): Invoice {
   return normalizeInvoice({
     ...raw,
+    adjustments: migrateAdjustments(raw.adjustments),
     paymentInfo: migratePaymentInfo(raw.paymentInfo),
     payments: raw.payments || [],
     publicToken: raw.publicToken || undefined,
@@ -142,12 +168,7 @@ function migrateInvoice(raw: any): Invoice {
 }
 
 function calculateInvoiceTotal(invoice: Invoice): number {
-  const lineTotal = invoice.lineItems.reduce(
-    (sum, item) => sum + item.quantity * item.rate,
-    0
-  );
-
-  return lineTotal + lineTotal * (invoice.taxRate / 100);
+  return calculateTotal(invoice.lineItems, invoice.taxRate);
 }
 
 function resolveInvoiceStatus(invoice: Invoice): InvoiceStatus {
@@ -155,13 +176,16 @@ function resolveInvoiceStatus(invoice: Invoice): InvoiceStatus {
     (sum, payment) => sum + payment.amount,
     0
   );
+  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
   const invoiceTotal = calculateInvoiceTotal(invoice);
+  const settledAmount = totalPaid + adjustmentTotal;
+  const remainingBalance = Math.max(0, invoiceTotal - settledAmount);
 
-  if (invoiceTotal > 0 && totalPaid >= invoiceTotal) {
+  if (invoice.status !== "draft" && invoiceTotal > 0 && remainingBalance <= 0) {
     return "paid";
   }
 
-  if (totalPaid > 0) {
+  if (settledAmount > 0 && remainingBalance > 0) {
     return "partially_paid";
   }
 
@@ -179,6 +203,7 @@ function resolveInvoiceStatus(invoice: Invoice): InvoiceStatus {
 function normalizeInvoice(invoice: Invoice): Invoice {
   return {
     ...invoice,
+    adjustments: migrateAdjustments(invoice.adjustments),
     status: resolveInvoiceStatus(invoice),
   };
 }

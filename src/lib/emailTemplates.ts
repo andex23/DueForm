@@ -1,5 +1,7 @@
 import { Invoice, ReminderRule } from "./types";
 import {
+  calculateAdjustedTotal,
+  calculateAdjustmentTotal,
   calculateAmountPaid,
   calculateBalance,
   calculateTotal,
@@ -22,24 +24,50 @@ function formatMultilineText(value: string): string {
 
 function buildSummaryRows(invoice: Invoice): string {
   const total = calculateTotal(invoice.lineItems, invoice.taxRate);
+  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
   const paid = calculateAmountPaid(invoice.payments || []);
   const balance = calculateBalance(
     invoice.lineItems,
     invoice.taxRate,
-    invoice.payments || []
+    invoice.payments || [],
+    invoice.adjustments || []
   );
 
-  const rows = [
+  const rows: Array<[string, string]> = [
     ["Invoice", invoice.invoiceNumber],
     ["Issued", formatDate(invoice.dateIssued)],
     ["Due", formatDate(invoice.dateDue)],
-    ["Total", formatCurrency(total, invoice.currency)],
+    ["Invoice Total", formatCurrency(total, invoice.currency)],
   ];
+
+  (invoice.adjustments || [])
+    .filter((adjustment) => adjustment.amount > 0 || adjustment.label.trim())
+    .forEach((adjustment) => {
+      rows.push([
+        adjustment.label.trim() || "Credit / Offset",
+        `-${formatCurrency(adjustment.amount || 0, invoice.currency)}`,
+      ]);
+    });
+
+  if (adjustmentTotal > 0) {
+    rows.push([
+      "Adjusted Due",
+      formatCurrency(
+        calculateAdjustedTotal(
+          invoice.lineItems,
+          invoice.taxRate,
+          invoice.adjustments || []
+        ),
+        invoice.currency
+      ),
+    ]);
+  }
 
   if (paid > 0) {
     rows.push(["Paid", formatCurrency(paid, invoice.currency)]);
-    rows.push(["Balance", formatCurrency(balance, invoice.currency)]);
   }
+
+  rows.push(["Balance Due", formatCurrency(balance, invoice.currency)]);
 
   return rows
     .map(
@@ -138,7 +166,8 @@ export function buildReminderMessage(invoice: Invoice, rule?: ReminderRule): str
   const balance = calculateBalance(
     invoice.lineItems,
     invoice.taxRate,
-    invoice.payments || []
+    invoice.payments || [],
+    invoice.adjustments || []
   );
 
   if (rule?.offsetDays === 0) {
