@@ -436,10 +436,92 @@ export default function AuthGate({
                     Create polished invoices, send ready-to-send PDFs, and keep every payment detail in one calm workspace.
                   </p>
                 </ScrollReveal>
+
+                <div className="mt-7 hidden max-w-[560px] space-y-2.5 lg:block">
+                  {featureRows.map((item, index) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <ScrollReveal key={`desktop-${item.title}`} delay={90 + index * 60}>
+                        <div className="flex items-start gap-3 rounded-[10px] border border-border/70 bg-bg-card/70 px-3.5 py-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-dim text-accent">
+                            <Icon size={14} />
+                          </div>
+                          <div>
+                            <div className="text-[14px] font-semibold text-text">
+                              {item.title}
+                            </div>
+                            <p className="m-0 mt-1 text-[12px] leading-5 text-text-muted">
+                              {item.body}
+                            </p>
+                          </div>
+                        </div>
+                      </ScrollReveal>
+                    );
+                  })}
+                </div>
+
+                <ScrollReveal delay={180} className="mt-6 hidden max-w-[560px] xl:block">
+                  <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(23,25,29,0.92),rgba(15,16,19,0.92))] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] sm:p-5">
+                    <div className="rounded-[10px] border border-[#e7e2d7]/85 bg-[#fbf8f2] px-4 py-5 text-[#1f1c18] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:px-5 sm:py-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="font-['Courier_New',monospace] text-[0.78rem] font-bold uppercase tracking-[0.24em] text-accent">
+                            Invoice
+                          </div>
+                          <div className="mt-3 font-['Courier_New',monospace] text-[1.5rem] font-bold tracking-[-0.04em] text-[#15120f]">
+                            DSL-0001
+                          </div>
+                        </div>
+                        <div className="text-right font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#5a544c]">
+                          <div>Mar 20, 2026</div>
+                          <div>Due Apr 19, 2026</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 h-px bg-[#e7dfd3]" />
+
+                      <div className="mt-5 grid gap-5 sm:grid-cols-[1fr_220px]">
+                        <div>
+                          <div className="font-['Courier_New',monospace] text-[0.72rem] font-bold uppercase tracking-[0.26em] text-accent">
+                            Bill To
+                          </div>
+                          <div className="mt-3 font-['Courier_New',monospace] text-[1rem] font-bold text-[#15120f]">
+                            Pahokee Home
+                          </div>
+                          <div className="mt-2 space-y-1 font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#655e56]">
+                            <div>andrewjuniorja@gmail.com</div>
+                            <div>+63 927 954 6284</div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
+                            <span>Subtotal</span>
+                            <span>$800.00</span>
+                          </div>
+                          <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
+                            <span>Tax (0%)</span>
+                            <span>$0.00</span>
+                          </div>
+                          <div className="flex items-end justify-between pt-1 font-['Courier_New',monospace]">
+                            <span className="text-[0.95rem] font-bold text-[#2f2b26]">
+                              Total Due
+                            </span>
+                            <span className="text-[1.6rem] font-bold tracking-[-0.04em] text-accent">
+                              $800.00
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
               </section>
 
-              <section className="flex items-start justify-center lg:items-center">
-                <ScrollReveal delay={60} className="w-full max-w-[540px]">
+              <section className="flex items-start justify-center lg:items-start">
+                <div className="w-full max-w-[540px]">
+                <ScrollReveal delay={60}>
                   <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] shadow-[0_14px_34px_rgba(0,0,0,0.24)]">
                     <button
                       type="button"
@@ -628,10 +710,14 @@ export default function AuthGate({
                     </div>
                   </div>
                 </ScrollReveal>
+                <div className="mt-4 hidden lg:block">
+                  <ThemeSwitcher compact className="w-full max-w-[280px]" />
+                </div>
+                </div>
               </section>
             </div>
 
-            <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-start">
+            <div className="mt-5 grid gap-4 lg:hidden">
               <div className="max-w-[560px] space-y-2.5">
                 {featureRows.map((item, index) => {
                   const Icon = item.icon;
@@ -714,7 +800,7 @@ export default function AuthGate({
               </ScrollReveal>
             </div>
 
-            <div className="mt-5 flex justify-start">
+            <div className="mt-5 flex justify-start lg:hidden">
               <ThemeSwitcher compact className="w-full max-w-[280px]" />
             </div>
           </div>
