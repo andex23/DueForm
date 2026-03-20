@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import {
   ArrowLeft,
   BellRing,
+  ChevronDown,
   Copy,
   Download,
   Edit3,
@@ -23,6 +24,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import InvoiceDocument from "./InvoiceDocument";
 import StatusBadge from "./StatusBadge";
+import { downloadInvoiceCsv } from "@/lib/generateCSV";
 import {
   addPayment,
   deleteInvoice,
@@ -72,8 +74,11 @@ function todayString() {
 
 export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const composeRequested = searchParams.get("compose") === "1";
+  const downloadRequested = searchParams.get("download") === "1";
   const [invoice, setInvoice] = useState(initialInvoice);
-  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(composeRequested);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [senderSettings, setSenderSettings] = useState<EmailSenderSettings>(() => {
@@ -107,8 +112,12 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const [sendingReminderId, setSendingReminderId] = useState<string | null>(
     null
   );
-  const [downloading, setDownloading] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<
+    "pdf" | "csv" | null
+  >(null);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(downloadRequested);
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const downloadMenuRef = useRef<HTMLDivElement>(null);
 
   const total = calculateTotal(invoice.lineItems, invoice.taxRate);
   const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
@@ -132,6 +141,24 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const publicUrl = invoice.publicToken
     ? buildPublicInvoiceUrl(invoice.publicToken)
     : "";
+
+  useEffect(() => {
+    if (!showDownloadMenu) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!downloadMenuRef.current?.contains(event.target as Node)) {
+        setShowDownloadMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [showDownloadMenu]);
 
   const syncWorkspaceToCloud = async (): Promise<boolean> => {
     if (!isCloudConfigured() || isGuestModeEnabled()) {
@@ -191,7 +218,8 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const handleDownloadPDF = async () => {
     if (!invoiceRef.current) return;
 
-    setDownloading(true);
+    setShowDownloadMenu(false);
+    setDownloadingFormat("pdf");
     try {
       await generatePDF(invoiceRef.current, `${invoice.invoiceNumber}.pdf`);
       toast.success("PDF downloaded");
@@ -199,7 +227,22 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       console.error(error);
       toast.error("Failed to generate PDF");
     } finally {
-      setDownloading(false);
+      setDownloadingFormat(null);
+    }
+  };
+
+  const handleDownloadCSV = async () => {
+    setShowDownloadMenu(false);
+    setDownloadingFormat("csv");
+
+    try {
+      downloadInvoiceCsv(invoice);
+      toast.success("CSV downloaded");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to export CSV");
+    } finally {
+      setDownloadingFormat(null);
     }
   };
 
@@ -533,18 +576,51 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
             <Mail size={15} />
             {invoice.sentAt ? "Resend" : "Email"}
           </button>
-          <button
-            onClick={handleDownloadPDF}
-            disabled={downloading}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-text hover:border-border-hover text-[13px] font-medium transition-all cursor-pointer bg-transparent disabled:opacity-40"
-          >
-            {downloading ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              <Download size={15} />
+          <div className="relative" ref={downloadMenuRef}>
+            <button
+              onClick={() => setShowDownloadMenu((current) => !current)}
+              disabled={Boolean(downloadingFormat)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-text hover:border-border-hover text-[13px] font-medium transition-all cursor-pointer bg-transparent disabled:opacity-40"
+            >
+              {downloadingFormat ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Download size={15} />
+              )}
+              Download
+              <ChevronDown
+                size={14}
+                className={`transition-transform ${showDownloadMenu ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {showDownloadMenu && (
+              <div className="absolute right-0 top-full z-30 mt-2 w-[220px] overflow-hidden rounded-[10px] border border-border bg-bg-card shadow-[0_16px_36px_rgba(0,0,0,0.28)]">
+                <button
+                  onClick={handleDownloadPDF}
+                  className="w-full border-b border-border px-4 py-3 text-left transition-all hover:bg-bg-elevated"
+                >
+                  <div className="text-[13px] font-semibold text-text">
+                    Download PDF
+                  </div>
+                  <div className="mt-1 text-[11px] text-text-dim">
+                    Clean invoice layout for sharing or print.
+                  </div>
+                </button>
+                <button
+                  onClick={handleDownloadCSV}
+                  className="w-full px-4 py-3 text-left transition-all hover:bg-bg-elevated"
+                >
+                  <div className="text-[13px] font-semibold text-text">
+                    Export CSV
+                  </div>
+                  <div className="mt-1 text-[11px] text-text-dim">
+                    Line items, totals, payments, and client details.
+                  </div>
+                </button>
+              </div>
             )}
-            PDF
-          </button>
+          </div>
           <Link
             href={`/invoices/${invoice.id}/edit`}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-bg text-[13px] font-semibold hover:bg-accent-hover transition-all no-underline"

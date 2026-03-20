@@ -125,7 +125,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
   const bodyCourierClass =
     "font-['Courier_New',monospace] text-[0.95rem] font-semibold leading-7 tracking-[0.01em] text-[#413a31]";
   const amountTextClass =
-    "font-[family-name:var(--font-mono)] text-[1rem] font-semibold leading-7 text-[#3f382f]";
+    "text-[1rem] font-semibold leading-7 text-[#3f382f]";
 
   return (
     <div

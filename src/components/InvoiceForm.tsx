@@ -708,7 +708,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
               className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[13px] font-semibold text-bg transition-all hover:bg-accent-hover"
             >
               <Download size={15} />
-              Download PDF
+              Download
             </button>
           </div>
         </div>
