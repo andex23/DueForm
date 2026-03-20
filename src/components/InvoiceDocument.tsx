@@ -135,8 +135,8 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
       }}
     >
       <div className="px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-16 lg:py-14">
-        <div className="flex flex-col gap-10 md:flex-row md:items-start md:justify-between">
-          <div className="max-w-[560px]">
+        <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_320px] md:gap-16 md:items-start">
+          <div className="max-w-[460px]">
             {invoice.business.logoDataUrl && (
               <div className="mb-6">
                 <Image
@@ -163,17 +163,35 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
             </div>
           </div>
 
-          <div className="md:min-w-[280px] md:text-right">
-            <div className={headingLabelClass}>
-              Invoice
-            </div>
-            <div className="mt-2 font-[family-name:var(--font-display)] text-[2rem] font-semibold tracking-[0.05em] text-[#9c7c42] sm:text-[2.4rem]">
-              {invoice.invoiceNumber}
-            </div>
+          <div className="w-full md:justify-self-end">
+            <div className="flex flex-col gap-10 md:items-end">
+              <div className="md:text-right">
+                <div className={headingLabelClass}>
+                  Invoice
+                </div>
+                <div className="mt-2 font-[family-name:var(--font-display)] text-[2rem] font-semibold tracking-[0.04em] text-[#9c7c42] sm:text-[2.45rem]">
+                  {invoice.invoiceNumber}
+                </div>
+              </div>
 
-            <div className={`mt-8 flex flex-wrap gap-x-8 gap-y-3 md:justify-end ${metaTextClass}`}>
-              <div>{formatShortDate(invoice.dateIssued)}</div>
-              <div>Due {formatShortDate(invoice.dateDue)}</div>
+              <div className="grid grid-cols-2 gap-x-10 gap-y-3 md:text-right">
+                <div>
+                  <div className="font-[family-name:var(--font-body)] text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#9c7c42]">
+                    Issued
+                  </div>
+                  <div className={`mt-2 ${metaTextClass}`}>
+                    {formatShortDate(invoice.dateIssued)}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-[family-name:var(--font-body)] text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#9c7c42]">
+                    Due
+                  </div>
+                  <div className={`mt-2 ${metaTextClass}`}>
+                    {formatShortDate(invoice.dateDue)}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
