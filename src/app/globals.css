@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--theme-bg);
+  --color-bg-elevated: var(--theme-secondary-surface);
+  --color-bg-card: var(--theme-card);
+  --color-bg-input: var(--theme-secondary-surface);
+  --color-border: var(--theme-border);
+  --color-border-hover: var(--theme-border-hover);
+  --color-text: var(--theme-primary-text);
+  --color-text-muted: var(--theme-secondary-text);
+  --color-text-dim: var(--theme-text-dim);
+  --color-accent: var(--theme-accent);
+  --color-accent-hover: var(--theme-accent-hover);
+  --color-accent-dim: var(--theme-accent-soft-bg);
+  --color-success: var(--theme-success);
+  --color-warning: var(--theme-warning);
+  --color-danger: var(--theme-danger);
+  --color-overdue: var(--theme-overdue);
+
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+:root,
+[data-theme="slate-blue"] {
+  color-scheme: dark;
+  --theme-bg: #0b0b0c;
+  --theme-card: #121316;
+  --theme-secondary-surface: #17191d;
+  --theme-border: #262a31;
+  --theme-border-hover: #353b45;
+  --theme-primary-text: #f3f1ec;
+  --theme-secondary-text: #a7adb7;
+  --theme-text-dim: #6d7480;
+  --theme-accent: #7c8fa3;
+  --theme-accent-hover: #91a3b5;
+  --theme-accent-soft-bg: #1a2128;
+  --theme-success: #6f8f7b;
+  --theme-warning: #a28d67;
+  --theme-danger: #8d5c63;
+  --theme-overdue: #a56f77;
+}
+
+[data-theme="soft-ivory"] {
+  --theme-bg: #0c0b0a;
+  --theme-card: #151311;
+  --theme-secondary-surface: #1c1917;
+  --theme-border: #2b2622;
+  --theme-border-hover: #3a342f;
+  --theme-primary-text: #f2ede6;
+  --theme-secondary-text: #b8b0a5;
+  --theme-text-dim: #847d73;
+  --theme-accent: #d8d0c4;
+  --theme-accent-hover: #e6ded3;
+  --theme-accent-soft-bg: #211d19;
+  --theme-success: #8b9a87;
+  --theme-warning: #aa9673;
+  --theme-danger: #9a6b6b;
+  --theme-overdue: #ad7676;
+}
+
+[data-theme="muted-olive"] {
+  --theme-bg: #0b0c0a;
+  --theme-card: #121510;
+  --theme-secondary-surface: #181c15;
+  --theme-border: #2a3025;
+  --theme-border-hover: #394133;
+  --theme-primary-text: #f1efe8;
+  --theme-secondary-text: #a8ad9d;
+  --theme-text-dim: #727868;
+  --theme-accent: #7e8b6f;
+  --theme-accent-hover: #95a184;
+  --theme-accent-soft-bg: #1a1e16;
+  --theme-success: #7c9b83;
+  --theme-warning: #9d9671;
+  --theme-danger: #8f6666;
+  --theme-overdue: #a27474;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+input, textarea, select {
+  font-family: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.35s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.stagger-1 { animation-delay: 0.05s; opacity: 0; }
+.stagger-2 { animation-delay: 0.1s; opacity: 0; }
+.stagger-3 { animation-delay: 0.15s; opacity: 0; }
+.stagger-4 { animation-delay: 0.2s; opacity: 0; }
+.stagger-5 { animation-delay: 0.25s; opacity: 0; }
+
+.noise-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
