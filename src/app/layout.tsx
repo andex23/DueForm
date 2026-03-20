@@ -23,12 +23,23 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dueform.vercel.app"),
   title: "DueForm",
   description: "Create invoices, send PDFs, and track payments with DueForm.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
-    apple: "/icon.svg",
+  },
+  openGraph: {
+    title: "DueForm",
+    description: "Create invoices, send PDFs, and track payments with DueForm.",
+    siteName: "DueForm",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DueForm",
+    description: "Create invoices, send PDFs, and track payments with DueForm.",
   },
 };
 
