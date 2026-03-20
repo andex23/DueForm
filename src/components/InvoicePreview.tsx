@@ -26,6 +26,7 @@ import StatusBadge from "./StatusBadge";
 import {
   addPayment,
   deleteInvoice,
+  exportWorkspaceData,
   getEmailSenderSettings,
   getNextInvoiceNumber,
   removePayment,
@@ -48,6 +49,12 @@ import {
   getNextReminderRule,
 } from "@/lib/helpers";
 import { generatePDF } from "@/lib/generatePDF";
+import {
+  getCloudClient,
+  isCloudConfigured,
+  isGuestModeEnabled,
+  uploadWorkspaceSnapshot,
+} from "@/lib/cloud";
 import {
   EmailSenderSettings,
   Invoice,
@@ -126,6 +133,35 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     ? buildPublicInvoiceUrl(invoice.publicToken)
     : "";
 
+  const syncWorkspaceToCloud = async (): Promise<boolean> => {
+    if (!isCloudConfigured() || isGuestModeEnabled()) {
+      return false;
+    }
+
+    const client = getCloudClient();
+    if (!client) {
+      return false;
+    }
+
+    const {
+      data: { session },
+    } = await client.auth.getSession();
+
+    if (!session?.user.id) {
+      return false;
+    }
+
+    const snapshot = exportWorkspaceData();
+    const { error } = await uploadWorkspaceSnapshot(session.user.id, snapshot);
+
+    if (error) {
+      console.error("Public invoice publish failed", error);
+      return false;
+    }
+
+    return true;
+  };
+
   const persistInvoice = (nextInvoice: Invoice, successMessage?: string) => {
     saveInvoice(nextInvoice);
     setInvoice(nextInvoice);
@@ -134,9 +170,10 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     }
   };
 
-  const ensurePublicInvoice = () => {
+  const ensurePublicInvoice = async () => {
     if (invoice.publicEnabled && invoice.publicToken) {
-      return invoice;
+      const published = await syncWorkspaceToCloud();
+      return published ? invoice : null;
     }
 
     const nextInvoice: Invoice = {
@@ -147,7 +184,8 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     };
 
     persistInvoice(nextInvoice);
-    return nextInvoice;
+    const published = await syncWorkspaceToCloud();
+    return published ? nextInvoice : null;
   };
 
   const handleDownloadPDF = async () => {
@@ -207,7 +245,11 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       return;
     }
 
-    const shareableInvoice = ensurePublicInvoice();
+    const shareableInvoice = await ensurePublicInvoice();
+    if (!shareableInvoice) {
+      toast.error("Sign in to publish a public invoice link for sharing");
+      return;
+    }
     setSending(true);
 
     try {
@@ -278,7 +320,11 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   };
 
   const handleCopyPublicLink = async () => {
-    const shareableInvoice = ensurePublicInvoice();
+    const shareableInvoice = await ensurePublicInvoice();
+    if (!shareableInvoice) {
+      toast.error("Sign in to publish a public invoice link for sharing");
+      return;
+    }
     const shareUrl = buildPublicInvoiceUrl(
       shareableInvoice.publicToken || generatePublicToken()
     );
@@ -292,7 +338,12 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     }
   };
 
-  const handleTogglePublic = () => {
+  const handleTogglePublic = async () => {
+    if (!invoice.publicEnabled && (!isCloudConfigured() || isGuestModeEnabled())) {
+      toast.error("Sign in to publish a public invoice link");
+      return;
+    }
+
     const nextInvoice: Invoice = {
       ...invoice,
       publicEnabled: !invoice.publicEnabled,
@@ -304,6 +355,11 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       nextInvoice,
       nextInvoice.publicEnabled ? "Public link enabled" : "Public link disabled"
     );
+
+    const synced = await syncWorkspaceToCloud();
+    if (nextInvoice.publicEnabled && !synced) {
+      toast.error("Could not publish the public invoice link yet");
+    }
   };
 
   const handleAddPayment = () => {
@@ -366,7 +422,11 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       return;
     }
 
-    const shareableInvoice = ensurePublicInvoice();
+    const shareableInvoice = await ensurePublicInvoice();
+    if (!shareableInvoice) {
+      toast.error("Sign in to publish a public invoice link for sharing");
+      return;
+    }
     setSendingReminderId(rule?.id || "manual");
 
     try {

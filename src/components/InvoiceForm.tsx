@@ -594,7 +594,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
     setAutosaveLabel("Draft saved");
 
     if (mode === "draft") {
-      toast.success(isEditing ? "Draft updated" : "Draft created");
+      toast.success(isEditing ? "Invoice saved" : "Invoice created");
       if (isEditing) {
         return;
       }
@@ -687,7 +687,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
               className="flex items-center gap-2 rounded-lg border border-border bg-bg-input px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-border-hover hover:text-text"
             >
               <Save size={15} />
-              Save Draft
+              {isEditing ? "Save Invoice" : "Create Invoice"}
             </button>
             <button
               onClick={() => persistInvoice("preview")}
@@ -1670,7 +1670,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
           className="flex items-center gap-2 rounded-lg bg-accent px-5 py-3 text-[14px] font-semibold text-bg transition-all hover:bg-accent-hover"
         >
           <Save size={16} />
-          {isEditing ? "Save Draft" : "Create Draft"}
+          {isEditing ? "Save Invoice" : "Create Invoice"}
         </button>
       </div>
     </div>
