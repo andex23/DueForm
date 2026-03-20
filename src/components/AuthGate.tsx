@@ -42,17 +42,17 @@ const featureRows = [
   {
     icon: FileText,
     title: "Create polished invoices fast",
-    body: "Build clean invoice pages and export ready-to-send PDFs in minutes.",
+    body: "Create clean invoices and export ready-to-send PDFs.",
   },
   {
     icon: WalletCards,
     title: "Track payment details clearly",
-    body: "Capture payment methods, balances, and overdue states in one workspace.",
+    body: "Track payment methods, balances, and overdue states.",
   },
   {
     icon: Sparkles,
     title: "Reuse repeat work",
-    body: "Keep clients, saved items, and previous invoices close for faster billing.",
+    body: "Keep clients, saved items, and previous invoices close.",
   },
 ] as const;
 
@@ -395,9 +395,15 @@ export default function AuthGate({
 
   if (!session && !guestMode) {
     const isSigningIn = view === "signin";
+    const authTitle = isSigningIn
+      ? "Sign in to your workspace"
+      : "Create your account";
+    const authDescription = isSigningIn
+      ? "Access your invoices, clients, and payment history."
+      : "Start creating professional invoices in minutes.";
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-bg px-4 py-4 sm:px-8 sm:py-8 lg:px-10">
+      <div className="relative min-h-screen overflow-hidden bg-bg px-4 pb-6 pt-3 sm:px-8 sm:py-8 lg:px-10">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent_24%)]" />
           <div className="absolute left-[8%] top-[12%] h-[260px] w-[260px] rounded-full bg-accent/7 blur-3xl" />
@@ -405,316 +411,308 @@ export default function AuthGate({
         </div>
 
         <div className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-[1350px] items-start lg:min-h-[calc(100vh-4rem)] lg:items-center">
-          <div className="w-full rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:p-8 lg:p-10">
-          <div className="grid w-full gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)]">
-            <section className="order-1 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:px-6">
-              <div>
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <span className="flex h-10 w-10 items-center justify-center text-accent sm:h-11 sm:w-11">
-                    <ReceiptText size={28} strokeWidth={1.8} />
+          <div className="w-full rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:p-7 lg:p-10">
+            <div className="grid w-full gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(400px,540px)] lg:gap-8">
+              <section className="px-1 py-1 sm:px-3 lg:px-6">
+                <div className="flex items-center gap-2.5 sm:gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center text-accent sm:h-10 sm:w-10">
+                    <ReceiptText size={24} strokeWidth={1.9} />
                   </span>
                   <div>
-                    <span className="block font-[family-name:var(--font-display)] text-[32px] font-semibold uppercase tracking-[0.04em] text-text sm:text-[38px]">
+                    <span className="block font-[family-name:var(--font-display)] text-[28px] font-semibold uppercase leading-none tracking-[0.05em] text-text sm:text-[34px]">
                       DueForm
                     </span>
-                    <span className="mt-1 block text-[11px] font-medium uppercase tracking-[0.24em] text-text-dim">
+                    <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.22em] text-text-dim">
                       Invoice Workspace
                     </span>
                   </div>
                 </div>
 
-                <ScrollReveal delay={40} className="mt-7 max-w-[560px] sm:mt-10">
-                  <h1 className="m-0 max-w-[12ch] font-[family-name:var(--font-display)] text-[36px] font-semibold leading-[0.96] tracking-[-0.035em] text-text sm:max-w-[11ch] sm:text-[58px]">
+                <ScrollReveal delay={40} className="mt-5 max-w-[520px] sm:mt-7">
+                  <h1 className="m-0 max-w-[11ch] font-[family-name:var(--font-display)] text-[32px] font-semibold leading-[0.94] tracking-[-0.03em] text-text sm:text-[52px]">
                     Create invoices, send PDFs, track payments.
                   </h1>
-                  <p className="m-0 mt-4 max-w-[490px] text-[15px] leading-6 text-text-muted sm:mt-5 sm:text-[16px] sm:leading-7">
-                    A calmer invoice workflow for freelancers, studios, and small
-                    teams who want polished billing without the usual clutter.
+                  <p className="m-0 mt-3 max-w-[410px] text-[14px] leading-6 text-text-muted sm:mt-4 sm:text-[15px]">
+                    Polished billing for freelancers, studios, and small teams.
                   </p>
                 </ScrollReveal>
+              </section>
 
-                <div className="mt-7 max-w-[560px] space-y-3 sm:mt-10 sm:space-y-4">
-                  {featureRows.map((item, index) => {
-                    const Icon = item.icon;
+              <section className="flex items-start justify-center lg:items-center">
+                <ScrollReveal delay={60} className="w-full max-w-[540px]">
+                  <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] shadow-[0_14px_34px_rgba(0,0,0,0.24)]">
+                    <button
+                      type="button"
+                      onClick={() => setMobileAuthOpen((open) => !open)}
+                      className="flex w-full items-center justify-between px-5 py-4 text-left lg:hidden"
+                    >
+                      <div>
+                        <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
+                          {isSigningIn ? "Sign in" : "Create account"}
+                        </div>
+                        <div className="mt-1.5 text-[14px] font-medium text-text">
+                          {isSigningIn
+                            ? "Sign in to continue"
+                            : "Create your account"}
+                        </div>
+                      </div>
+                      <ChevronDown
+                        size={18}
+                        className={`text-text-muted transition-transform ${mobileAuthOpen ? "rotate-180" : ""}`}
+                      />
+                    </button>
 
-                    return (
-                      <ScrollReveal
-                        key={item.title}
-                        delay={90 + index * 70}
-                      >
-                        <div className="flex items-start gap-3 rounded-[10px] border border-border/70 bg-bg-card/70 px-4 py-3.5 sm:gap-4 sm:py-4">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-dim text-accent">
-                            <Icon size={16} />
-                          </div>
+                    <div className={`${mobileAuthOpen ? "block" : "hidden"} lg:block`}>
+                      <div className="border-t border-border/80 px-5 py-5 sm:px-7 sm:py-7 lg:border-t-0 lg:p-8">
+                        <div className="hidden items-start justify-between gap-4 lg:flex">
                           <div>
-                            <div className="text-[15px] font-semibold text-text">
-                              {item.title}
+                            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-accent">
+                              {isSigningIn ? "Account access" : "New workspace"}
                             </div>
-                            <p className="m-0 mt-1 text-[13px] leading-6 text-text-muted">
-                              {item.body}
+                            <h2 className="m-0 mt-3 font-[family-name:var(--font-display)] text-[34px] font-semibold leading-none tracking-[-0.03em] text-text">
+                              {authTitle}
+                            </h2>
+                            <p className="m-0 mt-3 max-w-[30ch] text-[14px] leading-6 text-text-muted">
+                              {authDescription}
                             </p>
                           </div>
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-accent-dim text-accent">
+                            {isSigningIn ? <LogIn size={18} /> : <UserRoundPlus size={18} />}
+                          </div>
                         </div>
-                      </ScrollReveal>
-                    );
-                  })}
-                </div>
+
+                        <div className="rounded-[10px] border border-border bg-bg-elevated p-1.5">
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              onClick={() => setView("signin")}
+                              className={`rounded-lg px-4 py-2.5 text-[13px] font-semibold transition-all ${
+                                isSigningIn
+                                  ? "bg-accent text-[#0e141b] shadow-lg shadow-black/15"
+                                  : "text-text-muted hover:text-text"
+                              }`}
+                            >
+                              Sign in
+                            </button>
+                            <button
+                              onClick={() => setView("signup")}
+                              className={`rounded-lg px-4 py-2.5 text-[13px] font-semibold transition-all ${
+                                !isSigningIn
+                                  ? "bg-accent text-[#0e141b] shadow-lg shadow-black/15"
+                                  : "text-text-muted hover:text-text"
+                              }`}
+                            >
+                              Create account
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-5 space-y-3.5 sm:space-y-4">
+                          {!isSigningIn && (
+                            <>
+                              <div>
+                                <label className="mb-2 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
+                                  Full name
+                                </label>
+                                <input
+                                  className={authInputClass}
+                                  value={fullName}
+                                  onChange={(event) => setFullName(event.target.value)}
+                                  placeholder="Jane Doe"
+                                  autoComplete="name"
+                                />
+                              </div>
+                              <div>
+                                <label className="mb-2 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
+                                  Business name
+                                </label>
+                                <input
+                                  className={authInputClass}
+                                  value={businessName}
+                                  onChange={(event) => setBusinessName(event.target.value)}
+                                  placeholder="Doe Studio"
+                                  autoComplete="organization"
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          <div>
+                            <label className="mb-2 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              className={authInputClass}
+                              value={email}
+                              onChange={(event) => setEmail(event.target.value)}
+                              placeholder="you@example.com"
+                              autoComplete="email"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="mb-2 flex items-center justify-between gap-3">
+                              <label className="block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
+                                Password
+                              </label>
+                              {isSigningIn && (
+                                <button
+                                  onClick={handleForgotPassword}
+                                  disabled={resetLoading}
+                                  className="text-[12px] font-medium text-accent transition-colors hover:text-accent-hover disabled:opacity-60"
+                                >
+                                  {resetLoading ? "Sending..." : "Forgot password"}
+                                </button>
+                              )}
+                            </div>
+                            <input
+                              type="password"
+                              className={authInputClass}
+                              value={password}
+                              onChange={(event) => setPassword(event.target.value)}
+                              placeholder="At least 6 characters"
+                              autoComplete={isSigningIn ? "current-password" : "new-password"}
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={isSigningIn ? handleSignIn : handleSignUp}
+                          disabled={authLoading !== null || resetLoading}
+                          className="mt-5 flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 text-[15px] font-semibold text-[#0e141b] transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {authLoading === (isSigningIn ? "signin" : "signup") ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : isSigningIn ? (
+                            <LogIn size={16} />
+                          ) : (
+                            <UserRoundPlus size={16} />
+                          )}
+                          {isSigningIn ? "Sign in" : "Create account"}
+                        </button>
+
+                        <button
+                          onClick={handleContinueAsGuest}
+                          className="mt-3 flex h-[46px] w-full items-center justify-center gap-2 rounded-lg border border-border bg-transparent text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
+                        >
+                          Continue as guest
+                          <ArrowRight size={14} />
+                        </button>
+                        <p className="m-0 mt-2 text-center text-[11px] leading-5 text-text-dim">
+                          Local-only session. Not saved to the cloud.
+                        </p>
+
+                        <div className="mt-4 text-center text-[13px] text-text-muted">
+                          {isSigningIn
+                            ? "Don’t have an account?"
+                            : "Already have an account?"}{" "}
+                          <button
+                            onClick={() => {
+                              setView(isSigningIn ? "signup" : "signin");
+                              setMobileAuthOpen(true);
+                            }}
+                            className="font-semibold text-accent transition-colors hover:text-accent-hover"
+                          >
+                            {isSigningIn ? "Create one" : "Sign in"}
+                          </button>
+                        </div>
+
+                        <p className="m-0 mt-4 text-[12px] leading-5 text-text-dim">
+                          Use a real email address. New accounts may need email confirmation before sign-in works.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              </section>
+            </div>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)] lg:items-start">
+              <div className="max-w-[560px] space-y-2.5">
+                {featureRows.map((item, index) => {
+                  const Icon = item.icon;
+
+                  return (
+                    <ScrollReveal key={item.title} delay={90 + index * 60}>
+                      <div className="flex items-start gap-3 rounded-[10px] border border-border/70 bg-bg-card/70 px-3.5 py-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-dim text-accent">
+                          <Icon size={14} />
+                        </div>
+                        <div>
+                          <div className="text-[14px] font-semibold text-text">
+                            {item.title}
+                          </div>
+                          <p className="m-0 mt-1 text-[12px] leading-5 text-text-muted">
+                            {item.body}
+                          </p>
+                        </div>
+                      </div>
+                    </ScrollReveal>
+                  );
+                })}
               </div>
 
-              <ScrollReveal
-                delay={180}
-                className="hidden max-w-[560px] md:block"
-              >
+              <ScrollReveal delay={180} className="hidden md:block">
                 <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(23,25,29,0.92),rgba(15,16,19,0.92))] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] sm:p-5">
-                <div className="rounded-[10px] border border-[#e7e2d7]/85 bg-[#fbf8f2] px-4 py-5 text-[#1f1c18] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:px-5 sm:py-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="font-['Courier_New',monospace] text-[0.78rem] font-bold uppercase tracking-[0.24em] text-accent">
-                        Invoice
+                  <div className="rounded-[10px] border border-[#e7e2d7]/85 bg-[#fbf8f2] px-4 py-5 text-[#1f1c18] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:px-5 sm:py-6">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="font-['Courier_New',monospace] text-[0.78rem] font-bold uppercase tracking-[0.24em] text-accent">
+                          Invoice
+                        </div>
+                        <div className="mt-3 font-['Courier_New',monospace] text-[1.5rem] font-bold tracking-[-0.04em] text-[#15120f]">
+                          DSL-0001
+                        </div>
                       </div>
-                      <div className="mt-3 font-['Courier_New',monospace] text-[1.5rem] font-bold tracking-[-0.04em] text-[#15120f]">
-                        DSL-0001
+                      <div className="text-right font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#5a544c]">
+                        <div>Mar 20, 2026</div>
+                        <div>Due Apr 19, 2026</div>
                       </div>
                     </div>
-                    <div className="text-right font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#5a544c]">
-                      <div>Mar 20, 2026</div>
-                      <div>Due Apr 19, 2026</div>
+
+                    <div className="mt-6 h-px bg-[#e7dfd3]" />
+
+                    <div className="mt-5 grid gap-5 sm:grid-cols-[1fr_220px]">
+                      <div>
+                        <div className="font-['Courier_New',monospace] text-[0.72rem] font-bold uppercase tracking-[0.26em] text-accent">
+                          Bill To
+                        </div>
+                        <div className="mt-3 font-['Courier_New',monospace] text-[1rem] font-bold text-[#15120f]">
+                          Pahokee Home
+                        </div>
+                        <div className="mt-2 space-y-1 font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#655e56]">
+                          <div>andrewjuniorja@gmail.com</div>
+                          <div>+63 927 954 6284</div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
+                          <span>Subtotal</span>
+                          <span>$800.00</span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
+                          <span>Tax (0%)</span>
+                          <span>$0.00</span>
+                        </div>
+                        <div className="flex items-end justify-between pt-1 font-['Courier_New',monospace]">
+                          <span className="text-[0.95rem] font-bold text-[#2f2b26]">
+                            Total Due
+                          </span>
+                          <span className="text-[1.6rem] font-bold tracking-[-0.04em] text-accent">
+                            $800.00
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="mt-6 h-px bg-[#e7dfd3]" />
-
-                  <div className="mt-5 grid gap-5 sm:grid-cols-[1fr_220px]">
-                    <div>
-                      <div className="font-['Courier_New',monospace] text-[0.72rem] font-bold uppercase tracking-[0.26em] text-accent">
-                        Bill To
-                      </div>
-                      <div className="mt-3 font-['Courier_New',monospace] text-[1rem] font-bold text-[#15120f]">
-                        Pahokee Home
-                      </div>
-                      <div className="mt-2 space-y-1 font-['Courier_New',monospace] text-[0.82rem] font-semibold leading-6 text-[#655e56]">
-                        <div>andrewjuniorja@gmail.com</div>
-                        <div>+63 927 954 6284</div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
-                        <span>Subtotal</span>
-                        <span>$800.00</span>
-                      </div>
-                      <div className="flex items-center justify-between border-b border-[#ece5db] pb-2 font-['Courier_New',monospace] text-[0.82rem] font-semibold text-[#655e56]">
-                        <span>Tax (0%)</span>
-                        <span>$0.00</span>
-                      </div>
-                      <div className="flex items-end justify-between pt-1 font-['Courier_New',monospace]">
-                        <span className="text-[0.95rem] font-bold text-[#2f2b26]">
-                          Total Due
-                        </span>
-                        <span className="text-[1.6rem] font-bold tracking-[-0.04em] text-accent">
-                          $800.00
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 </div>
               </ScrollReveal>
-            </section>
+            </div>
 
-            <section className="order-2 flex items-start justify-center lg:items-center">
-              <ScrollReveal delay={40} className="w-full max-w-[560px]">
-                <div className="lg:hidden">
-                  <button
-                    type="button"
-                    onClick={() => setMobileAuthOpen((open) => !open)}
-                    className="flex w-full items-center justify-between rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] px-5 py-4 text-left shadow-[0_14px_34px_rgba(0,0,0,0.24)]"
-                  >
-                    <div>
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
-                        {isSigningIn ? "Sign in" : "Create account"}
-                      </div>
-                      <div className="mt-2 text-[14px] font-medium text-text">
-                        {mobileAuthOpen
-                          ? "Hide account access"
-                          : isSigningIn
-                            ? "Open account access"
-                            : "Open workspace setup"}
-                      </div>
-                    </div>
-                    <ChevronDown
-                      size={18}
-                      className={`text-text-muted transition-transform ${mobileAuthOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-                </div>
-
-                <div
-                  className={`${mobileAuthOpen ? "mt-4 block" : "hidden"} rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10 lg:mt-0 lg:block`}
-                >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-accent">
-                      {isSigningIn ? "Account access" : "New workspace"}
-                    </div>
-                    <h2 className="m-0 mt-4 font-[family-name:var(--font-display)] text-[36px] font-semibold leading-none tracking-[-0.03em] text-text sm:text-[40px]">
-                      {isSigningIn ? "Sign in" : "Create your account"}
-                    </h2>
-                    <p className="m-0 mt-3 max-w-[30ch] text-[15px] leading-6 text-text-muted">
-                      {isSigningIn
-                        ? "Access your invoices, clients, and payment history."
-                        : "Start creating professional invoices in minutes."}
-                    </p>
-                  </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-border bg-accent-dim text-accent">
-                    {isSigningIn ? <LogIn size={20} /> : <UserRoundPlus size={20} />}
-                  </div>
-                </div>
-
-                <div className="mt-8 rounded-[10px] border border-border bg-bg-elevated p-1.5">
-                  <div className="grid grid-cols-2 gap-1.5">
-                    <button
-                      onClick={() => setView("signin")}
-                      className={`rounded-lg px-4 py-2.5 text-[13px] font-semibold transition-all ${
-                        isSigningIn
-                          ? "bg-accent text-[#0e141b] shadow-lg shadow-black/15"
-                          : "text-text-muted hover:text-text"
-                      }`}
-                    >
-                      Sign in
-                    </button>
-                    <button
-                      onClick={() => setView("signup")}
-                      className={`rounded-lg px-4 py-2.5 text-[13px] font-semibold transition-all ${
-                        !isSigningIn
-                          ? "bg-accent text-[#0e141b] shadow-lg shadow-black/15"
-                          : "text-text-muted hover:text-text"
-                      }`}
-                    >
-                      Create account
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-7 space-y-4 sm:mt-8 sm:space-y-5">
-                  {!isSigningIn && (
-                    <>
-                      <div>
-                        <label className="mb-2.5 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
-                          Full name
-                        </label>
-                        <input
-                          className={authInputClass}
-                          value={fullName}
-                          onChange={(event) => setFullName(event.target.value)}
-                          placeholder="Jane Doe"
-                          autoComplete="name"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-2.5 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
-                          Business name
-                        </label>
-                        <input
-                          className={authInputClass}
-                          value={businessName}
-                          onChange={(event) => setBusinessName(event.target.value)}
-                          placeholder="Doe Studio"
-                          autoComplete="organization"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <label className="mb-2.5 block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className={authInputClass}
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="mb-2.5 flex items-center justify-between gap-3">
-                      <label className="block text-[12px] font-semibold tracking-[0.04em] text-text-muted">
-                        Password
-                      </label>
-                      {isSigningIn && (
-                        <button
-                          onClick={handleForgotPassword}
-                          disabled={resetLoading}
-                          className="text-[12px] font-medium text-accent transition-colors hover:text-accent-hover disabled:opacity-60"
-                        >
-                          {resetLoading ? "Sending..." : "Forgot password"}
-                        </button>
-                      )}
-                    </div>
-                    <input
-                      type="password"
-                      className={authInputClass}
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      placeholder="At least 6 characters"
-                      autoComplete={isSigningIn ? "current-password" : "new-password"}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  onClick={isSigningIn ? handleSignIn : handleSignUp}
-                  disabled={authLoading !== null || resetLoading}
-                  className="mt-8 flex h-[54px] w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 text-[15px] font-semibold text-[#0e141b] transition-all hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {authLoading === (isSigningIn ? "signin" : "signup") ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : isSigningIn ? (
-                    <LogIn size={16} />
-                  ) : (
-                    <UserRoundPlus size={16} />
-                  )}
-                  {isSigningIn ? "Sign in" : "Create account"}
-                </button>
-
-                <div className="mt-5 text-center text-[13px] text-text-muted">
-                  {isSigningIn ? "Don’t have an account?" : "Already have an account?"}{" "}
-                  <button
-                    onClick={() => setView(isSigningIn ? "signup" : "signin")}
-                    className="font-semibold text-accent transition-colors hover:text-accent-hover"
-                  >
-                    {isSigningIn ? "Create one" : "Sign in"}
-                  </button>
-                </div>
-
-                <div className="mt-6 border-t border-border pt-5 text-center">
-                  <button
-                    onClick={handleContinueAsGuest}
-                    className="inline-flex items-center gap-2 text-[13px] font-medium text-text-muted transition-colors hover:text-accent"
-                  >
-                    Continue in guest mode
-                    <ArrowRight size={14} />
-                  </button>
-                  <p className="m-0 mt-2 text-[12px] leading-5 text-text-dim">
-                    Temporary access only. Data stays in this tab and is not saved to the cloud.
-                  </p>
-                </div>
-
-                <p className="m-0 mt-5 text-[12px] leading-6 text-text-dim">
-                  Use a real email address. New accounts may need email confirmation before sign-in works.
-                </p>
-                </div>
-              </ScrollReveal>
-            </section>
-          </div>
-
-          <div className="mt-6 flex justify-start lg:justify-end">
-            <ThemeSwitcher compact className="w-full max-w-[360px] sm:w-[320px]" />
-          </div>
+            <div className="mt-5 flex justify-start">
+              <ThemeSwitcher compact className="w-full max-w-[280px]" />
+            </div>
           </div>
         </div>
       </div>
