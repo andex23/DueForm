@@ -104,6 +104,8 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
     !!invoice.paymentTerms;
   const methodSummary = getMethodSummary(paymentMethods);
   const amountLabel = amountPaid > 0 || adjustmentTotal > 0 ? "Balance Due" : "Total Due";
+  const showSeparateDueDate =
+    Boolean(invoice.dateDue) && invoice.dateDue !== invoice.dateIssued;
   const senderLines = [
     invoice.business.email,
     invoice.business.phone,
@@ -174,23 +176,29 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-10 gap-y-3 md:text-right">
+              <div
+                className={`grid gap-x-10 gap-y-3 md:text-right ${
+                  showSeparateDueDate ? "grid-cols-2" : "grid-cols-1"
+                }`}
+              >
                 <div>
                   <div className="font-[family-name:var(--font-body)] text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#9c7c42]">
-                    Issued
+                    {showSeparateDueDate ? "Issued" : "Date"}
                   </div>
                   <div className={`mt-2 ${metaTextClass}`}>
                     {formatShortDate(invoice.dateIssued)}
                   </div>
                 </div>
-                <div>
-                  <div className="font-[family-name:var(--font-body)] text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#9c7c42]">
-                    Due
+                {showSeparateDueDate && (
+                  <div>
+                    <div className="font-[family-name:var(--font-body)] text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-[#9c7c42]">
+                      Due
+                    </div>
+                    <div className={`mt-2 ${metaTextClass}`}>
+                      {formatShortDate(invoice.dateDue)}
+                    </div>
                   </div>
-                  <div className={`mt-2 ${metaTextClass}`}>
-                    {formatShortDate(invoice.dateDue)}
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
