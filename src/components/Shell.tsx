@@ -72,7 +72,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="flex-1 px-5 py-5 sm:px-6 sm:py-6 lg:ml-[260px] lg:p-8 xl:p-10">
+        <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:ml-[260px] lg:p-8 xl:p-10">
           {children}
         </main>
       </div>

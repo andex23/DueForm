@@ -172,7 +172,7 @@ function SettingsContent() {
   const iconButtonClass =
     "flex h-8 w-8 items-center justify-center rounded-lg bg-transparent text-text-dim/40 transition-all hover:bg-accent/10 hover:text-accent";
   const modalClass =
-    "bg-bg-card border border-border rounded-[12px] w-[520px] p-6 animate-scale-in shadow-[0_14px_34px_rgba(0,0,0,0.24)]";
+    "bg-bg-card border border-border rounded-[12px] w-full max-w-[520px] p-5 sm:p-6 animate-scale-in shadow-[0_14px_34px_rgba(0,0,0,0.24)]";
   const tabMeta = {
     business: {
       eyebrow: "Workspace Settings",
@@ -342,9 +342,9 @@ function SettingsContent() {
 
   return (
     <Shell>
-      <div className="mx-auto max-w-[1080px] animate-fade-in space-y-6">
-        <section className={`${panelClass} p-6`}>
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-[1080px] animate-fade-in space-y-5 sm:space-y-6">
+        <section className={`${panelClass} p-5 sm:p-6`}>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 {activeTabMeta.eyebrow}
@@ -357,7 +357,7 @@ function SettingsContent() {
               </p>
             </div>
 
-            <div className="rounded-[10px] border border-border bg-bg-elevated/75 px-4 py-3 text-right">
+            <div className="rounded-[10px] border border-border bg-bg-elevated/75 px-4 py-3 text-left sm:text-right">
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-dim">
                 Overview
               </div>
@@ -366,7 +366,7 @@ function SettingsContent() {
           </div>
 
           <div className="mt-6 rounded-[10px] border border-border bg-bg-elevated p-1">
-            <div className="grid gap-1 sm:grid-cols-5">
+            <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 xl:grid-cols-5">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
@@ -375,7 +375,7 @@ function SettingsContent() {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-[13px] font-medium transition-all ${
+                    className={`flex items-center justify-center gap-2 rounded-md px-3 py-2.5 text-[12px] font-medium transition-all sm:text-[13px] ${
                       isActive
                         ? "bg-accent/15 text-accent"
                         : "bg-transparent text-text-dim hover:text-text-muted"
@@ -418,7 +418,7 @@ function SettingsContent() {
                   {businesses.map((business, index) => (
                     <div
                       key={business.id}
-                      className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-start sm:justify-between ${
+                      className={`flex flex-col gap-4 px-4 py-4 sm:px-5 sm:flex-row sm:items-start sm:justify-between ${
                         index !== businesses.length - 1 ? "border-b border-border/80" : ""
                       } ${business.isDefault ? "bg-accent/6" : "bg-bg-card"}`}
                     >
@@ -445,7 +445,7 @@ function SettingsContent() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
                         {!business.isDefault && (
                           <button
                             onClick={() => handleSetDefault(business)}

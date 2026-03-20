@@ -12,6 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Shell from "@/components/Shell";
+import ScrollReveal from "@/components/ScrollReveal";
 import StatusBadge from "@/components/StatusBadge";
 import { getInvoices } from "@/lib/store";
 import {
@@ -127,8 +128,9 @@ function DashboardContent() {
 
   return (
     <Shell>
-      <div className="mx-auto max-w-[1140px] animate-fade-in space-y-6">
-        <section className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.96),rgba(13,14,16,0.96))] p-6 shadow-[0_10px_24px_rgba(0,0,0,0.14)]">
+      <div className="mx-auto max-w-[1140px] animate-fade-in space-y-5 sm:space-y-6">
+        <ScrollReveal>
+          <section className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.96),rgba(13,14,16,0.96))] p-5 shadow-[0_10px_24px_rgba(0,0,0,0.14)] sm:p-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
@@ -144,7 +146,7 @@ function DashboardContent() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="rounded-[10px] border border-border bg-bg-elevated/80 px-4 py-3 text-right">
+              <div className="rounded-[10px] border border-border bg-bg-elevated/80 px-4 py-3 text-left sm:text-right">
                 <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-text-dim">
                   Activity
                 </div>
@@ -163,21 +165,21 @@ function DashboardContent() {
             </div>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
             {summaryCards.map((card) => {
               const Icon = card.icon;
 
               return (
                 <div
                   key={card.label}
-                  className="rounded-[10px] border border-border bg-bg-card/80 p-5"
+                  className="rounded-[10px] border border-border bg-bg-card/80 p-4 sm:p-5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim">
                         {card.label}
                       </div>
-                      <div className={`mt-3 font-[family-name:var(--font-mono)] text-[24px] font-semibold tracking-tight ${card.valueTone}`}>
+                      <div className={`mt-3 font-[family-name:var(--font-mono)] text-[20px] font-semibold tracking-tight sm:text-[24px] ${card.valueTone}`}>
                         {card.value}
                       </div>
                     </div>
@@ -190,9 +192,11 @@ function DashboardContent() {
               );
             })}
           </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
-        <section className="rounded-[12px] border border-border bg-bg-card p-5 shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+        <ScrollReveal delay={80}>
+          <section className="rounded-[12px] border border-border bg-bg-card p-4 shadow-[0_8px_20px_rgba(0,0,0,0.12)] sm:p-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-text-dim">
@@ -217,7 +221,7 @@ function DashboardContent() {
                 />
               </div>
 
-              <div className="flex flex-wrap gap-1 rounded-[10px] border border-border bg-bg-elevated p-1">
+              <div className="grid grid-cols-3 gap-1 rounded-[10px] border border-border bg-bg-elevated p-1 sm:flex sm:flex-wrap">
                 {statusOptions.map((status) => (
                   <button
                     key={status}
@@ -234,10 +238,12 @@ function DashboardContent() {
               </div>
             </div>
           </div>
-        </section>
+          </section>
+        </ScrollReveal>
 
         {filtered.length === 0 ? (
-          <section className="rounded-[12px] border border-border bg-bg-card px-6 py-16 text-center shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+          <ScrollReveal delay={140}>
+            <section className="rounded-[12px] border border-border bg-bg-card px-6 py-16 text-center shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[10px] border border-border bg-bg-elevated">
               <FileText size={28} className="text-text-dim" />
             </div>
@@ -260,9 +266,11 @@ function DashboardContent() {
                 </Link>
               </div>
             )}
-          </section>
+            </section>
+          </ScrollReveal>
         ) : (
-          <section className="overflow-hidden rounded-[12px] border border-border bg-bg-card shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
+          <ScrollReveal delay={140}>
+            <section className="overflow-hidden rounded-[12px] border border-border bg-bg-card shadow-[0_8px_20px_rgba(0,0,0,0.12)]">
             <div className="flex flex-col gap-2 border-b border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-[12px] font-semibold uppercase tracking-[0.16em] text-text-dim">
@@ -273,7 +281,7 @@ function DashboardContent() {
                   {invoices.length !== 1 ? "s" : ""}
                 </div>
               </div>
-              <div className="text-[12px] text-text-dim">
+              <div className="hidden text-[12px] text-text-dim sm:block">
                 Sorted by latest activity in your current local workspace
               </div>
             </div>
@@ -294,10 +302,10 @@ function DashboardContent() {
                   <Link
                     key={invoice.id}
                     href={`/invoices/${invoice.id}`}
-                    className="group grid gap-4 px-5 py-4 transition-all hover:bg-bg-elevated/70 no-underline animate-fade-in md:grid-cols-[48px_minmax(0,1fr)_auto_20px]"
+                    className="group grid grid-cols-[44px_minmax(0,1fr)] gap-3 px-4 py-4 transition-all hover:bg-bg-elevated/70 no-underline animate-fade-in sm:px-5 md:grid-cols-[48px_minmax(0,1fr)_auto_20px] md:gap-4"
                     style={{ animationDelay: `${i * 0.04}s`, opacity: 0 }}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[10px] border border-border bg-accent/8">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-accent/8 md:h-12 md:w-12">
                       <FileText size={18} className="text-accent/70" />
                     </div>
 
@@ -317,9 +325,23 @@ function DashboardContent() {
                       <div className="mt-1 text-[12px] text-text-dim">
                         {invoice.invoiceNumber} · Issued {formatDate(invoice.dateIssued)}
                       </div>
+                      <div className="mt-3 flex items-start justify-between gap-4 md:hidden">
+                        <div>
+                          <div className="font-[family-name:var(--font-mono)] text-[15px] font-semibold text-text">
+                            {formatCurrency(total, cur)}
+                          </div>
+                          <div className="mt-1 text-[11px] leading-5 text-text-dim">
+                            Due {formatDate(invoice.dateDue)} · Balance {formatCurrency(balance, cur)}
+                          </div>
+                        </div>
+                        <ChevronRight
+                          size={16}
+                          className="mt-1 shrink-0 text-text-dim/40 transition-colors group-hover:text-text-dim"
+                        />
+                      </div>
                     </div>
 
-                    <div className="text-left md:text-right">
+                    <div className="hidden text-right md:block">
                       <div className="font-[family-name:var(--font-mono)] text-[16px] font-semibold text-text">
                         {formatCurrency(total, cur)}
                       </div>
@@ -338,7 +360,8 @@ function DashboardContent() {
                 );
               })}
             </div>
-          </section>
+            </section>
+          </ScrollReveal>
         )}
       </div>
     </Shell>

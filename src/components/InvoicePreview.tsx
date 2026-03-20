@@ -529,7 +529,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
 
   return (
     <div className="max-w-[980px] mx-auto animate-fade-in">
-      <div className="flex flex-wrap items-start justify-between gap-5 mb-8">
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 lg:flex-row lg:items-start lg:justify-between lg:gap-5">
         <div className="flex items-start gap-4">
           <Link
             href="/"
@@ -554,24 +554,24 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 lg:flex-wrap">
           <button
             onClick={handleDuplicate}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
           >
             <Copy size={15} />
             Duplicate
           </button>
           <button
             onClick={handleCopyPublicLink}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
           >
             <Link2 size={15} />
             Public Link
           </button>
           <button
             onClick={() => setShowEmailModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[13px] font-medium transition-all cursor-pointer bg-transparent"
           >
             <Mail size={15} />
             {invoice.sentAt ? "Resend" : "Email"}
@@ -580,7 +580,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
             <button
               onClick={() => setShowDownloadMenu((current) => !current)}
               disabled={Boolean(downloadingFormat)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-text hover:border-border-hover text-[13px] font-medium transition-all cursor-pointer bg-transparent disabled:opacity-40"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-text-muted hover:text-text hover:border-border-hover text-[13px] font-medium transition-all cursor-pointer bg-transparent disabled:opacity-40"
             >
               {downloadingFormat ? (
                 <Loader2 size={15} className="animate-spin" />
@@ -623,14 +623,14 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
           </div>
           <Link
             href={`/invoices/${invoice.id}/edit`}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-bg text-[13px] font-semibold hover:bg-accent-hover transition-all no-underline"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-accent text-bg text-[13px] font-semibold hover:bg-accent-hover transition-all no-underline"
           >
             <Edit3 size={15} />
             Edit
           </Link>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-9 h-9 rounded-lg border border-border flex items-center justify-center text-text-dim hover:text-danger hover:border-danger/30 transition-all cursor-pointer bg-transparent"
+            className="shrink-0 w-9 h-9 rounded-lg border border-border flex items-center justify-center text-text-dim hover:text-danger hover:border-danger/30 transition-all cursor-pointer bg-transparent"
           >
             <Trash2 size={15} />
           </button>
@@ -638,22 +638,22 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       </div>
 
       <div
-        className={`grid gap-4 mb-6 md:grid-cols-2 ${adjustmentTotal > 0 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}
+        className={`mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 ${adjustmentTotal > 0 ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}
       >
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-4 sm:p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
             Invoice Total
           </span>
-          <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)]">
+          <p className="text-[20px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] sm:text-[24px]">
             {formatCurrency(total, invoice.currency)}
           </p>
         </div>
         {adjustmentTotal > 0 && (
-          <div className="bg-bg-card border border-border rounded-xl p-5">
+          <div className="bg-bg-card border border-border rounded-xl p-4 sm:p-5">
             <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
               Credits
             </span>
-            <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-success">
+            <p className="text-[20px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-success sm:text-[24px]">
               -{formatCurrency(adjustmentTotal, invoice.currency)}
             </p>
             <span className="text-[11px] text-text-dim mt-1 block">
@@ -661,27 +661,27 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
             </span>
           </div>
         )}
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-4 sm:p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
             Paid
           </span>
-          <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-success">
+          <p className="text-[20px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-success sm:text-[24px]">
             {formatCurrency(amountPaid, invoice.currency)}
           </p>
         </div>
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-4 sm:p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
             Balance
           </span>
-          <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-accent">
+          <p className="text-[20px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] text-accent sm:text-[24px]">
             {formatCurrency(balance, invoice.currency)}
           </p>
         </div>
-        <div className="bg-bg-card border border-border rounded-xl p-5">
+        <div className="bg-bg-card border border-border rounded-xl p-4 sm:p-5">
           <span className="text-[11px] uppercase tracking-[0.15em] text-text-dim font-semibold">
             Reminders
           </span>
-          <p className="text-[24px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)]">
+          <p className="text-[20px] font-bold m-0 mt-3 font-[family-name:var(--font-mono)] sm:text-[24px]">
             {dueReminderRules.length}
           </p>
           <span className="text-[11px] text-text-dim mt-1 block">
@@ -696,7 +696,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
 
       <div className="grid lg:grid-cols-2 gap-5 mt-6">
         <div className="bg-bg-card border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-[14px] font-semibold text-text m-0">
                 Payment Tracker
@@ -754,7 +754,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
         </div>
 
         <div className="bg-bg-card border border-border rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h3 className="text-[14px] font-semibold text-text m-0">
                 Sharing & Reminders

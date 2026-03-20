@@ -29,6 +29,7 @@ import {
   uploadWorkspaceSnapshot,
 } from "@/lib/cloud";
 import ThemeSwitcher from "./ThemeSwitcher";
+import ScrollReveal from "./ScrollReveal";
 import { WorkspaceSnapshot } from "@/lib/types";
 
 type AuthView = "signin" | "signup";
@@ -394,68 +395,74 @@ export default function AuthGate({
     const isSigningIn = view === "signin";
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-bg px-5 py-6 sm:px-8 sm:py-8 lg:px-10">
+      <div className="relative min-h-screen overflow-hidden bg-bg px-4 py-4 sm:px-8 sm:py-8 lg:px-10">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.015),transparent_24%)]" />
           <div className="absolute left-[8%] top-[12%] h-[260px] w-[260px] rounded-full bg-accent/7 blur-3xl" />
           <div className="absolute right-[8%] bottom-[10%] h-[240px] w-[240px] rounded-full bg-accent-dim blur-3xl" />
         </div>
 
-        <div className="relative mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-[1350px] items-center">
+        <div className="relative mx-auto flex min-h-[calc(100vh-2rem)] w-full max-w-[1350px] items-start lg:min-h-[calc(100vh-4rem)] lg:items-center">
           <div className="absolute right-0 top-0 z-20 hidden sm:block">
             <ThemeSwitcher compact className="w-[290px]" />
           </div>
 
-          <div className="grid w-full gap-10 rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-5 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:p-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)] lg:p-10">
-            <section className="flex flex-col justify-between gap-10 px-2 py-2 sm:px-4 lg:px-6">
+          <div className="grid w-full gap-6 rounded-[12px] border border-border/80 bg-[linear-gradient(160deg,rgba(18,19,22,0.96),rgba(11,11,12,0.94))] p-4 shadow-[0_16px_42px_rgba(0,0,0,0.24)] sm:gap-8 sm:p-8 lg:grid-cols-[minmax(0,1.06fr)_minmax(420px,560px)] lg:p-10">
+            <section className="order-2 flex flex-col justify-between gap-7 px-1 py-1 sm:gap-8 sm:px-4 lg:order-1 lg:px-6">
               <div>
-                <div className="inline-flex items-center gap-3 rounded-full border border-border bg-bg-elevated px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">
+                <div className="inline-flex items-center gap-3 rounded-lg border border-border bg-bg-elevated px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-dim text-accent">
                     <Cloud size={15} />
                   </span>
                   DueForm
                 </div>
 
-                <div className="mt-10 max-w-[560px]">
+                <ScrollReveal delay={40} className="mt-7 max-w-[560px] sm:mt-10">
                   <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.26em] text-accent">
                     Multi-user invoicing
                   </p>
-                  <h1 className="m-0 mt-5 max-w-[11ch] font-[family-name:var(--font-display)] text-[44px] font-semibold leading-[0.96] tracking-[-0.035em] text-text sm:text-[58px]">
+                  <h1 className="m-0 mt-4 max-w-[12ch] font-[family-name:var(--font-display)] text-[36px] font-semibold leading-[0.96] tracking-[-0.035em] text-text sm:mt-5 sm:max-w-[11ch] sm:text-[58px]">
                     Create invoices, send PDFs, track payments.
                   </h1>
-                  <p className="m-0 mt-5 max-w-[490px] text-[16px] leading-7 text-text-muted">
+                  <p className="m-0 mt-4 max-w-[490px] text-[15px] leading-6 text-text-muted sm:mt-5 sm:text-[16px] sm:leading-7">
                     A calmer invoice workflow for freelancers, studios, and small
                     teams who want polished billing without the usual clutter.
                   </p>
-                </div>
+                </ScrollReveal>
 
-                <div className="mt-10 max-w-[560px] space-y-4">
-                  {featureRows.map((item) => {
+                <div className="mt-7 max-w-[560px] space-y-3 sm:mt-10 sm:space-y-4">
+                  {featureRows.map((item, index) => {
                     const Icon = item.icon;
 
                     return (
-                      <div
+                      <ScrollReveal
                         key={item.title}
-                        className="flex items-start gap-4 rounded-[10px] border border-border/70 bg-bg-card/70 px-4 py-4"
+                        delay={90 + index * 70}
                       >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-dim text-accent">
-                          <Icon size={16} />
-                        </div>
-                        <div>
-                          <div className="text-[15px] font-semibold text-text">
-                            {item.title}
+                        <div className="flex items-start gap-3 rounded-[10px] border border-border/70 bg-bg-card/70 px-4 py-3.5 sm:gap-4 sm:py-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-dim text-accent">
+                            <Icon size={16} />
                           </div>
-                          <p className="m-0 mt-1 text-[13px] leading-6 text-text-muted">
-                            {item.body}
-                          </p>
+                          <div>
+                            <div className="text-[15px] font-semibold text-text">
+                              {item.title}
+                            </div>
+                            <p className="m-0 mt-1 text-[13px] leading-6 text-text-muted">
+                              {item.body}
+                            </p>
+                          </div>
                         </div>
-                      </div>
+                      </ScrollReveal>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="max-w-[560px] rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(23,25,29,0.92),rgba(15,16,19,0.92))] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] sm:p-5">
+              <ScrollReveal
+                delay={180}
+                className="hidden max-w-[560px] md:block"
+              >
+                <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(23,25,29,0.92),rgba(15,16,19,0.92))] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.18)] sm:p-5">
                 <div className="rounded-[10px] border border-[#e7e2d7]/85 bg-[#fbf8f2] px-4 py-5 text-[#1f1c18] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] sm:px-5 sm:py-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -508,11 +515,13 @@ export default function AuthGate({
                     </div>
                   </div>
                 </div>
-              </div>
+                </div>
+              </ScrollReveal>
             </section>
 
-            <section className="flex items-center justify-center">
-              <div className="w-full max-w-[560px] rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-7 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10">
+            <section className="order-1 flex items-start justify-center lg:order-2 lg:items-center">
+              <ScrollReveal delay={40} className="w-full max-w-[560px]">
+                <div className="rounded-[12px] border border-border bg-[linear-gradient(180deg,rgba(18,19,22,0.98),rgba(15,17,20,0.98))] p-5 shadow-[0_14px_34px_rgba(0,0,0,0.24)] sm:p-10">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-accent">
@@ -561,7 +570,7 @@ export default function AuthGate({
                   </div>
                 </div>
 
-                <div className="mt-8 space-y-5">
+                <div className="mt-7 space-y-4 sm:mt-8 sm:space-y-5">
                   {!isSigningIn && (
                     <>
                       <div>
@@ -672,7 +681,8 @@ export default function AuthGate({
                 <p className="m-0 mt-5 text-[12px] leading-6 text-text-dim">
                   Use a real email address. New accounts may need email confirmation before sign-in works.
                 </p>
-              </div>
+                </div>
+              </ScrollReveal>
             </section>
           </div>
         </div>

@@ -642,7 +642,7 @@ function InvoiceFormContent({ existingInvoice }: Props) {
 
   return (
     <div className="mx-auto max-w-[1160px] animate-fade-in pb-24">
-      <div className="sticky top-4 z-30 mb-8 rounded-[12px] border border-[#2b261e] bg-[linear-gradient(180deg,rgba(18,16,13,0.94),rgba(14,13,10,0.94))] px-5 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+      <div className="sticky top-3 z-30 mb-6 rounded-[12px] border border-[#2b261e] bg-[linear-gradient(180deg,rgba(18,16,13,0.94),rgba(14,13,10,0.94))] px-4 py-4 shadow-[0_12px_30px_rgba(0,0,0,0.22)] backdrop-blur-xl sm:mb-8 sm:px-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex items-start gap-4">
             <Link
@@ -670,11 +670,11 @@ function InvoiceFormContent({ existingInvoice }: Props) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 xl:flex-wrap">
             <FormSelect
               value={currency}
               onChange={(e) => setCurrency(e.target.value as CurrencyCode)}
-              className="min-w-[132px]"
+              className="min-w-[132px] shrink-0"
             >
               {CURRENCIES.map((c) => (
                 <option key={c.code} value={c.code}>
@@ -684,28 +684,28 @@ function InvoiceFormContent({ existingInvoice }: Props) {
             </FormSelect>
             <button
               onClick={() => persistInvoice("draft")}
-              className="flex items-center gap-2 rounded-lg border border-border bg-bg-input px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-border-hover hover:text-text"
+              className="shrink-0 flex items-center gap-2 rounded-lg border border-border bg-bg-input px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-border-hover hover:text-text"
             >
               <Save size={15} />
               {isEditing ? "Save Invoice" : "Create Invoice"}
             </button>
             <button
               onClick={() => persistInvoice("preview")}
-              className="flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
+              className="shrink-0 flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
             >
               <Eye size={15} />
               Preview
             </button>
             <button
               onClick={() => persistInvoice("send")}
-              className="flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
+              className="shrink-0 flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2.5 text-[13px] font-medium text-text-muted transition-all hover:border-accent/30 hover:text-accent"
             >
               <Mail size={15} />
               Send
             </button>
             <button
               onClick={() => persistInvoice("download")}
-              className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[13px] font-semibold text-bg transition-all hover:bg-accent-hover"
+              className="shrink-0 flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-[13px] font-semibold text-bg transition-all hover:bg-accent-hover"
             >
               <Download size={15} />
               Download
