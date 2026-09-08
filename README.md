@@ -1,6 +1,10 @@
 # DueForm
 
-DueForm is a premium invoice workspace built with Next.js. It helps freelancers, studios, and small teams create polished invoices, send them by email, share public invoice links, and track payment status from a dark editorial interface.
+An invoice workspace for freelancers, studios, and small teams. Create invoices, export PDFs, track balances, and reuse client details for repeat billing.
+
+[Try DueForm](https://dueform.vercel.app/) — choose **Continue as guest** to explore without an account.
+
+![DueForm guest dashboard with invoice filters and payment overview](docs/images/preview.jpg)
 
 ## Highlights
 
@@ -12,7 +16,7 @@ DueForm is a premium invoice workspace built with Next.js. It helps freelancers,
 - Send invoices and reminders with Resend
 - Share public invoice links for mobile-friendly viewing
 - Use guest mode locally or sign in for cloud sync with Supabase
-- Switch between three premium dark themes
+- Switch between three interface themes
 
 ## Stack
 
@@ -107,9 +111,3 @@ src/lib              Data model, storage, themes, helpers, cloud sync
 supabase/schema.sql  Required database schema for cloud features
 ```
 
-## Status
-
-The current build passes:
-
-- `npm run lint`
-- `npm run build`
