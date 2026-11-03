@@ -29,8 +29,8 @@ import {
   addPayment,
   deleteInvoice,
   exportWorkspaceData,
-  getEmailSenderSettings,
-  getNextInvoiceNumber,
+  getInvoice,
+  duplicateInvoice,
   removePayment,
   saveInvoice,
 } from "@/lib/store";
@@ -58,7 +58,6 @@ import {
   uploadWorkspaceSnapshot,
 } from "@/lib/cloud";
 import {
-  EmailSenderSettings,
   Invoice,
   PartialPayment,
   ReminderRule,
@@ -66,6 +65,10 @@ import {
 
 interface Props {
   invoice: Invoice;
+}
+
+function isSecurePublicToken(token?: string): boolean {
+  return /^inv_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(token || "");
 }
 
 function todayString() {
@@ -81,14 +84,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   const [showEmailModal, setShowEmailModal] = useState(composeRequested);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [senderSettings, setSenderSettings] = useState<EmailSenderSettings>(() => {
-    const saved = getEmailSenderSettings();
-    return {
-      fromName: saved.fromName || initialInvoice.business.name,
-      fromEmail: saved.fromEmail || initialInvoice.business.email || "",
-    };
-  });
-  const [emailTo, setEmailTo] = useState(initialInvoice.client.email);
+  const emailTo = invoice.client.email;
   const [emailSubject, setEmailSubject] = useState(
     `Invoice ${initialInvoice.invoiceNumber} from ${initialInvoice.business.name}`
   );
@@ -116,6 +112,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     "pdf" | "csv" | null
   >(null);
   const [showDownloadMenu, setShowDownloadMenu] = useState(downloadRequested);
+  const deliveryInFlight = useRef(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
   const downloadMenuRef = useRef<HTMLDivElement>(null);
 
@@ -198,7 +195,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   };
 
   const ensurePublicInvoice = async () => {
-    if (invoice.publicEnabled && invoice.publicToken) {
+    if (invoice.publicEnabled && isSecurePublicToken(invoice.publicToken)) {
       const published = await syncWorkspaceToCloud();
       return published ? invoice : null;
     }
@@ -206,7 +203,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     const nextInvoice: Invoice = {
       ...invoice,
       publicEnabled: true,
-      publicToken: invoice.publicToken || generatePublicToken(),
+      publicToken: isSecurePublicToken(invoice.publicToken) ? invoice.publicToken : generatePublicToken(),
       updatedAt: new Date().toISOString(),
     };
 
@@ -247,31 +244,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   };
 
   const handleDuplicate = () => {
-    const now = new Date().toISOString();
-    const newInvoice: Invoice = {
-      ...invoice,
-      id: uuidv4(),
-      invoiceNumber: getNextInvoiceNumber(),
-      status: "draft",
-      dateIssued: todayString(),
-      dateDue: (() => {
-        const nextDate = new Date();
-        nextDate.setDate(nextDate.getDate() + 30);
-        return nextDate.toISOString().split("T")[0];
-      })(),
-      sentAt: undefined,
-      payments: [],
-      publicEnabled: false,
-      publicToken: generatePublicToken(),
-      emailDelivery: { status: "idle" },
-      reminderRules: (invoice.reminderRules || getDefaultReminderRules()).map(
-        (rule) => ({ ...rule })
-      ),
-      reminderHistory: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-    saveInvoice(newInvoice);
+    const newInvoice = duplicateInvoice(invoice);
     toast.success(`Duplicated as ${newInvoice.invoiceNumber}`);
     router.push(`/invoices/${newInvoice.id}`);
   };
@@ -283,35 +256,40 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   };
 
   const handleSendEmail = async () => {
+    if (deliveryInFlight.current) return;
     if (!emailTo) {
       toast.error("Email address is required");
       return;
     }
 
-    const shareableInvoice = await ensurePublicInvoice();
-    if (!shareableInvoice) {
-      toast.error("Sign in to publish a public invoice link for sharing");
-      return;
-    }
+    deliveryInFlight.current = true;
     setSending(true);
-
     try {
+      const shareableInvoice = await ensurePublicInvoice();
+      if (!shareableInvoice) {
+        toast.error("Sign in to publish a public invoice link for sharing");
+        return;
+      }
       const response = await fetch("/api/send-invoice", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${(await getCloudClient()?.auth.getSession())?.data.session?.access_token || ""}`,
+        },
         body: JSON.stringify({
           to: emailTo,
           subject: emailSubject,
           message: emailMessage,
-          invoice: shareableInvoice,
-          senderSettings,
+          invoiceId: shareableInvoice.id,
         }),
       });
       const data = await response.json();
+      const latestInvoice = getInvoice(invoice.id);
+      if (!latestInvoice) return;
 
       if (!data.success) {
         const failedInvoice: Invoice = {
-          ...shareableInvoice,
+          ...latestInvoice,
           emailDelivery: {
             status: "failed",
             lastSentAt: new Date().toISOString(),
@@ -327,8 +305,8 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       }
 
       const updatedInvoice: Invoice = {
-        ...shareableInvoice,
-        status: shareableInvoice.status === "draft" ? "sent" : shareableInvoice.status,
+        ...latestInvoice,
+        status: latestInvoice.status === "draft" ? "sent" : latestInvoice.status,
         sentAt: new Date().toISOString(),
         emailDelivery: {
           status: "sent",
@@ -344,8 +322,10 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       setShowEmailModal(false);
     } catch (error) {
       console.error(error);
+      const latestInvoice = getInvoice(invoice.id);
+      if (!latestInvoice) return;
       const failedInvoice: Invoice = {
-        ...invoice,
+        ...latestInvoice,
         emailDelivery: {
           status: "failed",
           lastSentAt: new Date().toISOString(),
@@ -358,6 +338,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       persistInvoice(failedInvoice);
       toast.error("Failed to send. Check your email settings.");
     } finally {
+      deliveryInFlight.current = false;
       setSending(false);
     }
   };
@@ -390,19 +371,19 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
     const nextInvoice: Invoice = {
       ...invoice,
       publicEnabled: !invoice.publicEnabled,
-      publicToken: invoice.publicToken || generatePublicToken(),
+      publicToken: isSecurePublicToken(invoice.publicToken) ? invoice.publicToken : generatePublicToken(),
       updatedAt: new Date().toISOString(),
     };
 
-    persistInvoice(
-      nextInvoice,
-      nextInvoice.publicEnabled ? "Public link enabled" : "Public link disabled"
-    );
-
+    persistInvoice(nextInvoice);
     const synced = await syncWorkspaceToCloud();
-    if (nextInvoice.publicEnabled && !synced) {
-      toast.error("Could not publish the public invoice link yet");
+    if (!synced) {
+      toast.error(nextInvoice.publicEnabled
+        ? "Could not publish the public invoice link yet"
+        : "Saved locally, but the public link may still be live. Reconnect and sync to revoke it.");
+      return;
     }
+    toast.success(nextInvoice.publicEnabled ? "Public link enabled" : "Public link disabled");
   };
 
   const handleAddPayment = () => {
@@ -460,36 +441,41 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
   };
 
   const handleSendReminder = async (rule?: ReminderRule) => {
+    if (deliveryInFlight.current) return;
     if (!invoice.client.email) {
       toast.error("Client email is required");
       return;
     }
 
-    const shareableInvoice = await ensurePublicInvoice();
-    if (!shareableInvoice) {
-      toast.error("Sign in to publish a public invoice link for sharing");
-      return;
-    }
+    deliveryInFlight.current = true;
     setSendingReminderId(rule?.id || "manual");
-
     try {
+      const shareableInvoice = await ensurePublicInvoice();
+      if (!shareableInvoice) {
+        toast.error("Sign in to publish a public invoice link for sharing");
+        return;
+      }
       const response = await fetch("/api/send-reminder", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${(await getCloudClient()?.auth.getSession())?.data.session?.access_token || ""}`,
+        },
         body: JSON.stringify({
           to: shareableInvoice.client.email,
-          invoice: shareableInvoice,
-          rule,
-          senderSettings,
+          invoiceId: shareableInvoice.id,
+          ruleId: rule?.id,
         }),
       });
       const data = await response.json();
       const sentAt = new Date().toISOString();
+      const latestInvoice = getInvoice(invoice.id);
+      if (!latestInvoice) return;
 
       const nextInvoice: Invoice = {
-        ...shareableInvoice,
+        ...latestInvoice,
         reminderHistory: [
-          ...(shareableInvoice.reminderHistory || []),
+          ...(latestInvoice.reminderHistory || []),
           {
             id: uuidv4(),
             ruleId: rule?.id,
@@ -516,6 +502,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
       console.error(error);
       toast.error("Failed to send reminder");
     } finally {
+      deliveryInFlight.current = false;
       setSendingReminderId(null);
     }
   };
@@ -857,7 +844,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
                     </label>
                     <button
                       onClick={() => handleSendReminder(rule)}
-                      disabled={sendingReminderId === rule.id}
+                      disabled={sending || Boolean(sendingReminderId)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium transition-all cursor-pointer border-0 ${
                         isDue
                           ? "bg-accent text-bg"
@@ -887,7 +874,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
               </div>
               <button
                 onClick={() => handleSendReminder()}
-                disabled={sendingReminderId === "manual"}
+                disabled={sending || Boolean(sendingReminderId)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/30 text-[12px] font-medium transition-all cursor-pointer bg-transparent disabled:opacity-50"
               >
                 {sendingReminderId === "manual" ? (
@@ -917,41 +904,10 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
               </button>
             </div>
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim mb-1.5">
-                    From Name
-                  </label>
-                  <input
-                    className="w-full bg-bg-input border border-border rounded-lg px-3.5 py-2.5 text-[14px] text-text outline-none focus:border-accent/50"
-                    value={senderSettings.fromName}
-                    onChange={(event) =>
-                      setSenderSettings((current) => ({
-                        ...current,
-                        fromName: event.target.value,
-                      }))
-                    }
-                    placeholder="Your Business"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim mb-1.5">
-                    From Email
-                  </label>
-                  <input
-                    className="w-full bg-bg-input border border-border rounded-lg px-3.5 py-2.5 text-[14px] text-text outline-none focus:border-accent/50"
-                    type="email"
-                    value={senderSettings.fromEmail}
-                    onChange={(event) =>
-                      setSenderSettings((current) => ({
-                        ...current,
-                        fromEmail: event.target.value,
-                      }))
-                    }
-                    placeholder="hello@yourdomain.com"
-                  />
-                </div>
-              </div>
+              <p className="text-[12px] text-text-dim leading-relaxed">
+                Sent through DueForm’s verified sender. Replies go to your signed-in email.
+                To change the recipient, edit the client email on this invoice.
+              </p>
               <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim mb-1.5">
                   To
@@ -959,7 +915,8 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
                 <input
                   className="w-full bg-bg-input border border-border rounded-lg px-3.5 py-2.5 text-[14px] text-text outline-none focus:border-accent/50"
                   value={emailTo}
-                  onChange={(event) => setEmailTo(event.target.value)}
+                  readOnly
+                  title="Edit the client email on the invoice to change the recipient"
                   placeholder="client@example.com"
                 />
               </div>
@@ -994,7 +951,7 @@ export default function InvoicePreview({ invoice: initialInvoice }: Props) {
               </button>
               <button
                 onClick={handleSendEmail}
-                disabled={sending}
+                disabled={sending || Boolean(sendingReminderId)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-bg text-[13px] font-semibold hover:bg-accent-hover transition-all cursor-pointer border-0 disabled:opacity-50"
               >
                 {sending ? (

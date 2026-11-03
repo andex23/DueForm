@@ -21,6 +21,7 @@ import {
   calculateBalance,
   calculateTotal,
   getDueReminderRules,
+  summarizeInvoiceMoney,
 } from "@/lib/helpers";
 import { useHydrated } from "@/lib/useHydrated";
 
@@ -62,28 +63,14 @@ function DashboardContent() {
     return matchesSearch && matchesStatus;
   });
 
-  const totalRevenue = invoices
-    .filter((i) => i.status === "paid")
-    .reduce((sum, i) => sum + calculateTotal(i.lineItems, i.taxRate), 0);
-
-  const totalOutstanding = invoices
-    .filter(
-      (i) =>
-        i.status === "sent" ||
-        i.status === "overdue" ||
-        i.status === "partially_paid"
-    )
-    .reduce(
-      (sum, i) =>
-        sum +
-          calculateBalance(
-            i.lineItems,
-            i.taxRate,
-            i.payments || [],
-            i.adjustments || []
-          ),
-      0
-    );
+  const moneyByCurrency = summarizeInvoiceMoney(invoices);
+  const displayMoney = (kind: "revenue" | "outstanding") => {
+    const entries = Object.entries(moneyByCurrency);
+    if (entries.length === 0) return formatCurrency(0);
+    return entries.map(([currency, totals]) =>
+      `${currency} ${formatCurrency(totals[kind], currency as keyof typeof moneyByCurrency)}`
+    ).join("\n");
+  };
 
   const totalDraft = invoices.filter((i) => i.status === "draft").length;
   const totalOverdue = invoices.filter((i) => i.status === "overdue").length;
@@ -94,15 +81,15 @@ function DashboardContent() {
   const summaryCards = [
     {
       label: "Revenue",
-      value: formatCurrency(totalRevenue),
-      note: "Paid invoices",
+      value: displayMoney("revenue"),
+      note: "Recorded payments",
       icon: DollarSign,
       tone: "text-success bg-success/10",
       valueTone: "text-text",
     },
     {
       label: "Outstanding",
-      value: formatCurrency(totalOutstanding),
+      value: displayMoney("outstanding"),
       note: "Awaiting payment",
       icon: Clock,
       tone: "text-accent bg-accent/10",
@@ -175,15 +162,15 @@ function DashboardContent() {
                   className="rounded-[10px] border border-border bg-bg-card/80 p-4 sm:p-5"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-dim">
                         {card.label}
                       </div>
-                      <div className={`mt-3 font-[family-name:var(--font-mono)] text-[20px] font-semibold tracking-tight sm:text-[24px] ${card.valueTone}`}>
+                      <div className={`mt-3 whitespace-pre-line break-words font-[family-name:var(--font-mono)] text-[20px] font-semibold tracking-tight sm:text-[24px] ${card.valueTone}`}>
                         {card.value}
                       </div>
                     </div>
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${card.tone}`}>
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${card.tone}`}>
                       <Icon size={17} />
                     </div>
                   </div>

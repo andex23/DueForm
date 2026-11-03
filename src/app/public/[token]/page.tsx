@@ -23,9 +23,9 @@ export default function PublicInvoicePage() {
   const params = useParams();
   const token = params.token as string;
   const localInvoice = hydrated ? getInvoiceByToken(token) : null;
-  const [cloudInvoice, setCloudInvoice] = useState<Invoice | null>(null);
+  const [cloudResult, setCloudResult] = useState<{ token: string; invoice: Invoice | null } | null>(null);
   const [loadingCloud, setLoadingCloud] = useState(false);
-  const invoice = localInvoice || cloudInvoice;
+  const invoice = localInvoice || (cloudResult?.token === token ? cloudResult.invoice : null);
 
   useEffect(() => {
     if (!hydrated) {
@@ -44,10 +44,19 @@ export default function PublicInvoicePage() {
 
     async function loadInvoice() {
       setLoadingCloud(true);
-      const cloudInvoice = await getPublicInvoiceFromCloud(token);
-      if (!cancelled) {
-        setCloudInvoice(cloudInvoice);
-        setLoadingCloud(false);
+      try {
+        const cloudInvoice = await getPublicInvoiceFromCloud(token);
+        if (!cancelled) {
+          setCloudResult({ token, invoice: cloudInvoice });
+        }
+      } catch {
+        if (!cancelled) {
+          setCloudResult({ token, invoice: null });
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingCloud(false);
+        }
       }
     }
 

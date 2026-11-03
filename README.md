@@ -59,12 +59,14 @@ RESEND_API_KEY=
 INVOICE_FROM_EMAIL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+APP_URL=http://localhost:3000
 ```
 
 Notes:
 
 - `RESEND_API_KEY` is required for live invoice and reminder sending.
-- `INVOICE_FROM_EMAIL` should be a sender Resend allows.
+- `INVOICE_FROM_EMAIL` must be a verified sender Resend allows. Browser-supplied sender addresses are never used.
+- `APP_URL` is the canonical public app origin (HTTPS in production), used for email links.
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` enable multi-user auth and cloud sync.
 - If Supabase is not configured, the app still works in guest mode with browser storage only.
 
@@ -85,13 +87,19 @@ DueForm uses Resend through:
 - `src/app/api/send-invoice/route.ts`
 - `src/app/api/send-reminder/route.ts`
 
-Users can enter sender name and sender email manually in the app. Delivery still depends on that sender being valid for the configured Resend account.
+Email requires a signed-in, email-verified Supabase account and a saved cloud invoice owned by that account. The server loads the stored invoice and client email rather than trusting invoice or recipient data from the browser. Replies go to the authenticated account email; the configured verified Resend sender is always used.
+
+Both routes share a database-backed limit of 10 attempts per account per hour and one attempt per invoice per minute. Failed provider attempts also consume a slot. Missing quota migration fails closed. These limits reduce abuse but do not replace provider-wide quotas or signup abuse monitoring.
+
+Guest mode still supports local invoicing, payment tracking, CSV and PDF export. Sending and public sharing require cloud sign-in.
 
 ## Scripts
 
 ```bash
 npm run dev
 npm run lint
+npm test
+npm run typecheck
 npm run build
 npm run start
 ```
@@ -111,3 +119,10 @@ src/lib              Data model, storage, themes, helpers, cloud sync
 supabase/schema.sql  Required database schema for cloud features
 ```
 
+
+## Security upgrade for existing projects
+
+Review [the migration and rollout checklist](supabase/SECURITY-MIGRATION.md) before
+releasing these changes. Apply the migration before the app update, configure
+`APP_URL`, and republish legacy invoice links. No migration or live email is run
+by the tests. Run `npm test`, `npm run lint`, `npm run typecheck` and `npm run build`.

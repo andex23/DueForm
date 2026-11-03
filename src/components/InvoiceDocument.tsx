@@ -137,7 +137,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
       }}
     >
       <div className="px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-12 lg:px-16 lg:py-14">
-        <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_320px] md:gap-16 md:items-start">
+        <div data-pdf-keep-together className="grid gap-10 md:grid-cols-[minmax(0,1fr)_320px] md:gap-16 md:items-start">
           <div className="max-w-[460px]">
             {invoice.business.logoDataUrl && (
               <div className="mb-6">
@@ -206,7 +206,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
 
         <div className="mt-10 h-px bg-[#ece3d6]" />
 
-        <section className="mt-8">
+        <section data-pdf-keep-together className="mt-8">
           <div className={headingLabelClass}>
             Bill To
           </div>
@@ -242,6 +242,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
             {invoice.lineItems.map((item) => (
               <div
                 key={item.id}
+                data-pdf-keep-together
                 className="grid grid-cols-[minmax(0,1fr)_86px_140px_160px] gap-6 border-b border-[#eee5d8] py-5"
               >
                 <div className="font-['Courier_New',monospace] text-[1rem] font-semibold leading-7 text-[#241e18]">
@@ -264,6 +265,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
             {invoice.lineItems.map((item) => (
               <div
                 key={item.id}
+                data-pdf-keep-together
                 className="rounded-[8px] border border-[#eadfce] bg-white/70 px-4 py-4"
               >
                 <div className="font-['Courier_New',monospace] text-[1rem] font-semibold leading-7 text-[#241e18]">
@@ -333,7 +335,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
                     }
 
                     return (
-                      <div key={method.id}>
+                      <div key={method.id} data-pdf-keep-together>
                         <div className="font-[family-name:var(--font-body)] text-[0.76rem] font-semibold uppercase tracking-[0.22em] text-[#857661]">
                           {getMethodName(method)}
                         </div>
@@ -379,7 +381,7 @@ export default forwardRef<HTMLDivElement, Props>(function InvoiceDocument(
             )}
           </div>
 
-          <div className="w-full lg:justify-self-end">
+          <div data-pdf-keep-together className="w-full lg:justify-self-end">
             <div className="mb-5 h-px w-16 bg-[#cdbca2]" />
             <div className="space-y-4">
               <div className="flex items-center justify-between gap-6 font-[family-name:var(--font-body)] text-[1rem] font-medium text-[#4f473d]">

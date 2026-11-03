@@ -14,8 +14,10 @@ import {
 } from "./types";
 import { v4 as uuidv4 } from "uuid";
 import {
-  calculateAdjustmentTotal,
-  calculateTotal,
+  calculateAmountPaid,
+  calculateBalance,
+  generatePublicToken,
+  roundMoney,
   getDefaultReminderRules,
 } from "./helpers";
 import { isGuestModeEnabled } from "./cloud";
@@ -167,37 +169,14 @@ function migrateInvoice(raw: any): Invoice {
   });
 }
 
-function calculateInvoiceTotal(invoice: Invoice): number {
-  return calculateTotal(invoice.lineItems, invoice.taxRate);
-}
-
 function resolveInvoiceStatus(invoice: Invoice): InvoiceStatus {
-  const totalPaid = (invoice.payments || []).reduce(
-    (sum, payment) => sum + payment.amount,
-    0
-  );
-  const adjustmentTotal = calculateAdjustmentTotal(invoice.adjustments || []);
-  const invoiceTotal = calculateInvoiceTotal(invoice);
-  const settledAmount = totalPaid + adjustmentTotal;
-  const remainingBalance = Math.max(0, invoiceTotal - settledAmount);
-
-  if (invoice.status !== "draft" && invoiceTotal > 0 && remainingBalance <= 0) {
-    return "paid";
-  }
-
-  if (settledAmount > 0 && remainingBalance > 0) {
-    return "partially_paid";
-  }
-
+  if (invoice.status === "draft") return "draft";
+  const remainingBalance = calculateBalance(invoice.lineItems, invoice.taxRate,
+    invoice.payments || [], invoice.adjustments || []);
+  if (remainingBalance === 0) return "paid";
+  if (calculateAmountPaid(invoice.payments || []) > 0) return "partially_paid";
   const today = new Date().toISOString().split("T")[0];
-  if (
-    (invoice.status === "sent" || invoice.status === "overdue") &&
-    invoice.dateDue < today
-  ) {
-    return "overdue";
-  }
-
-  return invoice.status;
+  return invoice.dateDue < today ? "overdue" : "sent";
 }
 
 function normalizeInvoice(invoice: Invoice): Invoice {
@@ -255,6 +234,33 @@ export function getNextInvoiceNumber(): string {
   return `DSL-${counter.toString().padStart(4, "0")}`;
 }
 
+// A duplicate is a new draft, not a copy of settlement or delivery history.
+export function duplicateInvoice(invoice: Invoice): Invoice {
+  const now = new Date();
+  const due = new Date(now);
+  due.setUTCDate(due.getUTCDate() + 30);
+  const copy: Invoice = {
+    ...structuredClone(invoice),
+    id: uuidv4(),
+    invoiceNumber: getNextInvoiceNumber(),
+    status: "draft",
+    dateIssued: now.toISOString().split("T")[0],
+    dateDue: due.toISOString().split("T")[0],
+    sentAt: undefined,
+    payments: [],
+    adjustments: [],
+    publicEnabled: false,
+    publicToken: generatePublicToken(),
+    emailDelivery: { status: "idle" },
+    reminderRules: (invoice.reminderRules || getDefaultReminderRules()).map((rule) => ({ ...rule })),
+    reminderHistory: [],
+    createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
+  };
+  saveInvoice(copy);
+  return copy;
+}
+
 // ─── Auto-overdue ───
 
 export function markOverdueInvoices(): void {
@@ -286,7 +292,16 @@ export function addPayment(invoiceId: string, payment: PartialPayment): Invoice 
   const invoices = getInvoices();
   const inv = invoices.find((i) => i.id === invoiceId);
   if (!inv) return null;
+  // A retried UI action must not record the same payment twice.
+  const existingPayment = (inv.payments || []).find((existing) => existing.id === payment.id);
+  if (existingPayment) return existingPayment.amount === payment.amount ? inv : null;
+  if (!Number.isFinite(payment.amount) || payment.amount <= 0 ||
+      roundMoney(payment.amount) !== payment.amount ||
+      payment.amount > calculateBalance(inv.lineItems, inv.taxRate, inv.payments, inv.adjustments)) {
+    return null;
+  }
   inv.payments = [...(inv.payments || []), payment];
+  if (inv.status === "draft") inv.status = "sent";
   inv.updatedAt = new Date().toISOString();
   inv.status = resolveInvoiceStatus(inv);
   writeWorkspaceItem(STORAGE_KEY, JSON.stringify(invoices));
