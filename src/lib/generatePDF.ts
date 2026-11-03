@@ -1,5 +1,7 @@
 "use client";
 
+import { getPdfPageSlices, PdfKeepTogetherRange } from "./pdfPagination";
+
 async function waitForFonts() {
   if (typeof document === "undefined" || !("fonts" in document)) {
     return;
@@ -57,11 +59,57 @@ export async function generatePDF(element: HTMLElement, filename: string) {
     backgroundColor: "#ffffff",
   });
 
-  const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF("p", "mm", "a4");
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  if (!canvas.width || !canvas.height) {
+    throw new Error("The invoice could not be rendered for PDF export");
+  }
 
-  pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  const pdf = new jsPDF("p", "mm", "a4");
+  const margin = 8;
+  const width = pdf.internal.pageSize.getWidth() - margin * 2;
+  const height = pdf.internal.pageSize.getHeight() - margin * 2;
+  const pixelsPerMm = canvas.width / width;
+  const bounds = element.getBoundingClientRect();
+  const scale = canvas.height / bounds.height;
+  const keepTogether: PdfKeepTogetherRange[] = [];
+  const addRange = (rect: DOMRect) => {
+    if (rect.width > 0 && rect.height > 0) {
+      keepTogether.push({
+        start: (rect.top - bounds.top) * scale,
+        end: (rect.bottom - bounds.top) * scale,
+      });
+    }
+  };
+
+  element.querySelectorAll("[data-pdf-keep-together]").forEach((block) => {
+    addRange(block.getBoundingClientRect());
+  });
+  // Also avoid cutting through individual text lines in long notes or rows
+  // that are themselves taller than a page.
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    if (!node.textContent?.trim()) continue;
+    range.selectNodeContents(node);
+    Array.from(range.getClientRects()).forEach(addRange);
+  }
+
+  const pages = getPdfPageSlices(canvas.height, height * pixelsPerMm, keepTogether);
+  const pageCanvas = document.createElement("canvas");
+  pageCanvas.width = canvas.width;
+  for (const [index, page] of pages.entries()) {
+    pageCanvas.height = page.height;
+    const context = pageCanvas.getContext("2d");
+    if (!context) throw new Error("PDF canvas is unavailable");
+    context.drawImage(
+      canvas, 0, page.start, canvas.width, page.height,
+      0, 0, canvas.width, page.height
+    );
+    if (index > 0) pdf.addPage();
+    pdf.addImage(
+      pageCanvas.toDataURL("image/png"), "PNG", margin, margin,
+      width, page.height / pixelsPerMm
+    );
+  }
   pdf.save(filename);
 }

@@ -29,26 +29,32 @@ const DEFAULT_REMINDER_RULES: ReminderRule[] = [
   },
 ];
 
+// Supported fiat currencies use two decimal places. Round each line, tax,
+// credit and payment consistently so displayed totals and settlement agree.
+export function roundMoney(amount: number): number {
+  return Math.round((amount + Number.EPSILON) * 100) / 100;
+}
+
 export function calculateSubtotal(items: LineItem[]): number {
-  return items.reduce((sum, item) => sum + item.quantity * item.rate, 0);
+  return roundMoney(items.reduce((sum, item) => sum + roundMoney(item.quantity * item.rate), 0));
 }
 
 export function calculateTax(subtotal: number, taxRate: number): number {
-  return subtotal * (taxRate / 100);
+  return roundMoney(subtotal * (taxRate / 100));
 }
 
 export function calculateTotal(items: LineItem[], taxRate: number): number {
   const subtotal = calculateSubtotal(items);
-  return subtotal + calculateTax(subtotal, taxRate);
+  return roundMoney(subtotal + calculateTax(subtotal, taxRate));
 }
 
 export function calculateAdjustmentTotal(
   adjustments: InvoiceAdjustment[] = []
 ): number {
-  return (adjustments || []).reduce((sum, adjustment) => {
+  return roundMoney((adjustments || []).reduce((sum, adjustment) => {
     const amount = Number.isFinite(adjustment.amount) ? adjustment.amount : 0;
-    return sum + Math.max(0, amount);
-  }, 0);
+    return sum + roundMoney(Math.max(0, amount));
+  }, 0));
 }
 
 export function calculateAdjustedTotal(
@@ -56,11 +62,11 @@ export function calculateAdjustedTotal(
   taxRate: number,
   adjustments: InvoiceAdjustment[] = []
 ): number {
-  return Math.max(0, calculateTotal(items, taxRate) - calculateAdjustmentTotal(adjustments));
+  return roundMoney(Math.max(0, calculateTotal(items, taxRate) - calculateAdjustmentTotal(adjustments)));
 }
 
 export function calculateAmountPaid(payments: PartialPayment[]): number {
-  return (payments || []).reduce((sum, p) => sum + p.amount, 0);
+  return roundMoney((payments || []).reduce((sum, p) => sum + roundMoney(p.amount), 0));
 }
 
 export function calculateBalance(
@@ -69,11 +75,11 @@ export function calculateBalance(
   payments: PartialPayment[],
   adjustments: InvoiceAdjustment[] = []
 ): number {
-  return Math.max(
+  return roundMoney(Math.max(
     0,
     calculateAdjustedTotal(items, taxRate, adjustments) -
       calculateAmountPaid(payments)
-  );
+  ));
 }
 
 export function getDefaultReminderRules(): ReminderRule[] {
@@ -142,15 +148,15 @@ export function getStatusBg(status: string): string {
 }
 
 export function generatePublicToken(): string {
-  return `inv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+  return `inv_${crypto.randomUUID()}`;
 }
 
 export function calculateReminderDate(
   dueDate: string,
   offsetDays: number
 ): string {
-  const date = new Date(`${dueDate}T00:00:00`);
-  date.setDate(date.getDate() + offsetDays);
+  const date = new Date(`${dueDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + offsetDays);
   return date.toISOString().split("T")[0];
 }
 
@@ -158,6 +164,10 @@ export function getDueReminderRules(
   invoice: Invoice,
   today = new Date().toISOString().split("T")[0]
 ): ReminderRule[] {
+  if (invoice.status === "draft" || invoice.status === "paid" ||
+      calculateBalance(invoice.lineItems, invoice.taxRate, invoice.payments, invoice.adjustments) <= 0) {
+    return [];
+  }
   const sentRuleIds = new Set(
     (invoice.reminderHistory || [])
       .filter((entry) => entry.status === "sent" && entry.ruleId)
@@ -177,9 +187,17 @@ export function getNextReminderRule(
   invoice: Invoice,
   today = new Date().toISOString().split("T")[0]
 ): ReminderRule | null {
-  const pendingRules = (invoice.reminderRules || [])
-    .filter((rule) => !getDueReminderRules(invoice, today).some((due) => due.id === rule.id))
-    .filter((rule) => rule.enabled);
+  if (invoice.status === "draft" || invoice.status === "paid" ||
+      calculateBalance(invoice.lineItems, invoice.taxRate, invoice.payments, invoice.adjustments) <= 0) {
+    return null;
+  }
+  const sentRuleIds = new Set((invoice.reminderHistory || [])
+    .filter((entry) => entry.status === "sent")
+    .map((entry) => entry.ruleId));
+  const pendingRules = (invoice.reminderRules || []).filter((rule) =>
+    rule.enabled && !sentRuleIds.has(rule.id) &&
+    calculateReminderDate(invoice.dateDue, rule.offsetDays) > today
+  );
 
   if (pendingRules.length === 0) {
     return null;
@@ -204,4 +222,17 @@ export function buildPublicInvoiceUrl(token: string): string {
   }
 
   return new URL(buildPublicInvoicePath(token), window.location.origin).toString();
+}
+
+export function summarizeInvoiceMoney(invoices: Invoice[]): Partial<Record<CurrencyCode, { revenue: number; outstanding: number }>> {
+  const totals: Partial<Record<CurrencyCode, { revenue: number; outstanding: number }>> = {};
+  for (const invoice of invoices) {
+    if (invoice.status === "draft") continue;
+    const current = totals[invoice.currency] ||= { revenue: 0, outstanding: 0 };
+    current.revenue = roundMoney(current.revenue + calculateAmountPaid(invoice.payments));
+    current.outstanding = roundMoney(current.outstanding + calculateBalance(
+      invoice.lineItems, invoice.taxRate, invoice.payments, invoice.adjustments
+    ));
+  }
+  return totals;
 }

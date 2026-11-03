@@ -60,7 +60,22 @@ export function setGuestModeEnabled(enabled: boolean): void {
   notifyAccessModeChanged();
 }
 
-export async function uploadWorkspaceSnapshot(
+// AuthGate auto-sync and explicit sharing/payment actions may overlap. Keep
+// their snapshots in invocation order so an older request cannot land last.
+let uploadQueue: Promise<void> = Promise.resolve();
+
+export function uploadWorkspaceSnapshot(
+  userId: string,
+  snapshot: WorkspaceSnapshot
+) {
+  const queuedSnapshot = structuredClone(snapshot);
+  const result = uploadQueue.then(() => uploadWorkspaceSnapshotNow(userId, queuedSnapshot));
+  // A failed attempt must not prevent later revocations or updates from syncing.
+  uploadQueue = result.then(() => undefined, () => undefined);
+  return result;
+}
+
+async function uploadWorkspaceSnapshotNow(
   userId: string,
   snapshot: WorkspaceSnapshot
 ) {
@@ -93,12 +108,16 @@ export async function uploadWorkspaceSnapshot(
       updated_at: new Date().toISOString(),
     }));
 
-  const { data: existingRows } = await client
+  const existingResult = await client
     .from(PUBLIC_INVOICE_TABLE)
     .select("token")
     .eq("owner_id", userId);
 
-  const existingTokens = new Set((existingRows || []).map((row) => row.token));
+  if (existingResult.error) {
+    return existingResult;
+  }
+
+  const existingTokens = new Set((existingResult.data || []).map((row) => row.token));
   const nextTokens = new Set(publicInvoices.map((invoice) => invoice.token));
   const staleTokens = [...existingTokens].filter((token) => !nextTokens.has(token));
 
@@ -175,13 +194,18 @@ export async function getPublicInvoiceFromCloud(
     return null;
   }
 
-  const { data } = await client
-    .from(PUBLIC_INVOICE_TABLE)
-    .select("invoice")
-    .eq("token", token)
-    .maybeSingle();
+  // Only this capability-based RPC is public. Never fall back to a table read.
+  if (token.length < 16 || token.length > 128) {
+    return null;
+  }
+  const { data, error } = await client.rpc("get_public_invoice", {
+    share_token: token,
+  });
 
-  return (data?.invoice as Invoice | undefined) || null;
+  if (error) {
+    throw new Error("Could not load the shared invoice");
+  }
+  return (data as Invoice | null) || null;
 }
 
 export function getLastCloudSyncAt(): string | null {
